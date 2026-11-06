@@ -14,8 +14,8 @@
           <h1>Invest in Markets That <em>Move</em> the World</h1>
           <p>PRIMEGLOBOPTIONS gives you institutional-grade access to global stocks, forex, crypto, and commodities backed by 256-bit security, real-time market data, and 24/7 expert support.</p>
           <div class="bk-hero-actions">
-            <a href="{{ route('register') }}" class="bk-btn bk-btn--white">Start Investing <i class="ri-arrow-right-line"></i></a>
-            <a href="{{ url('services') }}" class="bk-btn bk-btn--glass">Explore Markets <i class="ri-stock-line"></i></a>
+            <a href="{{ route('register') }}" class="bk-btn bk-btn--white">Register <i class="ri-arrow-right-line"></i></a>
+            <a href="{{ route('login') }}" class="bk-btn bk-btn--glass">Login <i class="ri-stock-line"></i></a>
           </div>
         </div>
       </div>
