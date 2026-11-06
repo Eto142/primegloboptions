@@ -35,7 +35,7 @@ class ManageUserController extends Controller
 
     public function userProfile($id)
     {
-        $user = DB::table('users')->where('id', $id)->first();
+        $user = User::find($id);
 
         if (!$user) {
             return redirect()->route('admin.users')->with('error', 'User not found.');
@@ -102,26 +102,52 @@ class ManageUserController extends Controller
             'user_trades' => Trade::where('user_id', $id)
                                         ->latest()
                                         ->get(),
+
+            'user_credits_list' => Credit::where('user_id', $id)
+                                        ->orderBy('id', 'desc')
+                                        ->get(),
+
+            'user_debits_list'  => Debit::where('user_id', $id)
+                                        ->orderBy('id', 'desc')
+                                        ->get(),
         ];
 
         // ── Investment broker data ──────────────────────────────────────
         $uid = $user->id;
         $investPlans            = \App\Models\InvestPlan::where('user_id', $uid)->orderBy('created_at', 'desc')->get();
         $investProfits          = \App\Models\InvestProfit::where('user_id', $uid)->orderBy('created_at', 'desc')->get();
+        $investDebitProfits     = \App\Models\InvestDebitProfit::where('user_id', $uid)->orderBy('created_at', 'desc')->get();
         $investEarnings         = \App\Models\InvestEarning::where('user_id', $uid)->orderBy('created_at', 'desc')->get();
         $investReferrals        = \App\Models\InvestReferral::where('user_id', $uid)->orderBy('created_at', 'desc')->get();
-        $investTotalDeposit     = \App\Models\Deposit::where('user_id', $uid)->where('status', '1')->sum('amount');
-        $investTotalProfit      = \App\Models\InvestProfit::where('user_id', $uid)->sum('amount') - \App\Models\InvestDebitProfit::where('user_id', $uid)->sum('amount');
+        $investKycs             = \App\Models\InvestKyc::where('user_id', $uid)->orderBy('created_at', 'desc')->get();
+        $investNotifications    = \App\Models\InvestNotification::where('user_id', $uid)->orderBy('created_at', 'desc')->get();
+        $investWithdrawals     = \App\Models\Withdrawal::where('user_id', $uid)->orderBy('created_at', 'desc')->get();
+
+        $investAddProfit        = \App\Models\InvestProfit::where('user_id', $uid)->sum('amount');
+        $investTotalDebitProfit = \App\Models\InvestDebitProfit::where('user_id', $uid)->sum('amount');
+        $investTotalDeposit    = \App\Models\Deposit::where('user_id', $uid)->where('status', '1')->sum('amount');
+        $investTotalProfit      = $investAddProfit - $investTotalDebitProfit;
         $investTotalEarning     = \App\Models\InvestEarning::where('user_id', $uid)->sum('amount');
         $investTotalBonus       = \App\Models\InvestReferral::where('user_id', $uid)->sum('amount');
         $investTotalWithdrawal  = \App\Models\Withdrawal::where('user_id', $uid)->sum('amount') ?? 0;
         $investTotalInvested    = \App\Models\InvestPlan::where('user_id', $uid)->whereIn('status', ['active', 'completed'])->sum('amount');
         $investBalance          = $investTotalDeposit + $investTotalEarning + $investTotalProfit + $investTotalBonus - $investTotalWithdrawal;
 
+        // Plan status breakdown for the broker summary
+        $investPlanPending     = \App\Models\InvestPlan::where('user_id', $uid)->where('status', 'pending')->count();
+        $investPlanActive      = \App\Models\InvestPlan::where('user_id', $uid)->where('status', 'active')->count();
+        $investPlanCompleted   = \App\Models\InvestPlan::where('user_id', $uid)->where('status', 'completed')->count();
+
         $data['investPlans']            = $investPlans;
         $data['investProfits']          = $investProfits;
+        $data['investDebitProfits']     = $investDebitProfits;
         $data['investEarnings']         = $investEarnings;
         $data['investReferrals']        = $investReferrals;
+        $data['investKycs']             = $investKycs;
+        $data['investNotifications']    = $investNotifications;
+        $data['investWithdrawals']      = $investWithdrawals;
+        $data['investAddProfit']        = $investAddProfit;
+        $data['investTotalDebitProfit'] = $investTotalDebitProfit;
         $data['investTotalDeposit']     = $investTotalDeposit;
         $data['investTotalProfit']      = $investTotalProfit;
         $data['investTotalEarning']     = $investTotalEarning;
@@ -129,6 +155,9 @@ class ManageUserController extends Controller
         $data['investTotalWithdrawal']  = $investTotalWithdrawal;
         $data['investTotalInvested']    = $investTotalInvested;
         $data['investBalance']          = $investBalance;
+        $data['investPlanPending']      = $investPlanPending;
+        $data['investPlanActive']       = $investPlanActive;
+        $data['investPlanCompleted']    = $investPlanCompleted;
 
         return view('admin.user_data', $data);
     }
@@ -193,6 +222,36 @@ class ManageUserController extends Controller
     }
 
     // ── Investment broker management (per-user) ─────────────────────────
+
+    // Update withdrawal tax code (investment broker account control)
+    public function WithdrawalTaxCode(Request $request, $id)
+    {
+        $request->validate(['withdrawal_tax_code' => 'nullable|string|max:255']);
+        $user = User::findOrFail($id);
+        $user->withdrawal_tax_code = $request->withdrawal_tax_code;
+        $user->save();
+        return back()->with('success', 'Withdrawal tax code updated successfully.');
+    }
+
+    // Update withdrawal percentage (investment broker account control)
+    public function updateWithdrawalPercentage(Request $request, $id)
+    {
+        $request->validate(['withdrawal_percentage' => 'required|numeric|min:0']);
+        $user = User::findOrFail($id);
+        $user->withdrawal_percentage = $request->withdrawal_percentage;
+        $user->save();
+        return back()->with('success', 'Withdrawal percentage updated successfully.');
+    }
+
+    // Update withdrawal tax amount (investment broker account control)
+    public function updateWithdrawalTaxAmount(Request $request, $id)
+    {
+        $request->validate(['withdrawal_tax_amount' => 'required|numeric|min:0']);
+        $user = User::findOrFail($id);
+        $user->withdrawal_tax_amount = $request->withdrawal_tax_amount;
+        $user->save();
+        return back()->with('success', 'Withdrawal tax amount updated successfully.');
+    }
 
     // Top up a user's investment profit
     public function addInvestProfit(Request $request)

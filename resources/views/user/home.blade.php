@@ -672,6 +672,16 @@
             </a>
           </div>
 
+          <div class="col">
+            <a href="{{ route('user.investments') }}" class="quick-action-item">
+              <div class="qa-icon" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);">
+                <i class="fas fa-seedling"></i>
+              </div>
+              <span class="qa-label">Broker</span>
+              <span class="qa-sub">Invest Now</span>
+            </a>
+          </div>
+
         </div>
       </div>
     </div>
@@ -812,6 +822,128 @@
         <p class="mb-3" style="font-size:0.82rem; color:rgba(255,255,255,0.65); max-width:340px;">Send money across 50+ countries with live real-time FX rates and zero delays.</p>
         <a href="{{ route('user.transfer.bank') }}" class="btn btn-sm rounded-pill px-4 fw-semibold" style="background:#fff; color:#9E7C14; font-size:0.8rem;">Transfer Funds</a>
       </div>
+    </div>
+  </div>
+
+  <!-- ────────────────────── ROW 5: Trading Signal Widget ── -->
+  <div class="row g-3 mb-2">
+    <div class="col-12">
+
+      {{-- Signal box with stock.jpg as background --}}
+      <div style="
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        background-image: url("{{ asset('stock.jpg') }}");
+        background-size: cover;
+        background-position: center;
+        min-height: 260px;
+        display: flex;
+        align-items: stretch;
+      ">
+        {{-- Dark overlay so text stays legible over the photo --}}
+        <div style="
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg,
+            rgba(6,11,24,0.88) 0%,
+            rgba(13,21,37,0.78) 50%,
+            rgba(6,11,24,0.65) 100%);
+          border-radius: 20px;
+        "></div>
+
+        {{-- Content --}}
+        <div style="position:relative;z-index:1;width:100%;padding:28px 28px 24px;">
+
+          {{-- Top row: Balance / Profit / Deposit stats --}}
+          <div style="display:flex;flex-wrap:wrap;gap:24px;margin-bottom:24px;">
+
+            <div>
+              <div style="font-size:0.66rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin-bottom:4px;">Balance</div>
+              <div style="font-size:1.55rem;font-weight:800;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;line-height:1;">
+                {{ Auth::user()->currency ?? '$' }}{{ number_format($balance ?? 0, 2) }}
+              </div>
+            </div>
+
+            <div style="width:1px;background:rgba(255,255,255,0.1);align-self:stretch;margin:2px 0;"></div>
+
+            <div>
+              <div style="font-size:0.66rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin-bottom:4px;">Profit</div>
+              <div style="font-size:1.55rem;font-weight:800;color:#00d395;font-family:'Plus Jakarta Sans',sans-serif;line-height:1;">
+                {{ Auth::user()->currency ?? '$' }}{{ number_format($profit ?? 0, 2) }}
+              </div>
+            </div>
+
+            <div style="width:1px;background:rgba(255,255,255,0.1);align-self:stretch;margin:2px 0;"></div>
+
+            <div>
+              <div style="font-size:0.66rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin-bottom:4px;">Deposit</div>
+              <div style="font-size:1.55rem;font-weight:800;color:#C9A227;font-family:'Plus Jakarta Sans',sans-serif;line-height:1;">
+                {{ Auth::user()->currency ?? '$' }}{{ number_format($deposit ?? 0, 2) }}
+              </div>
+            </div>
+
+          </div>
+
+          {{-- Signal strength bar --}}
+          <div style="margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.55);letter-spacing:1px;text-transform:uppercase;">Signal Strength</span>
+              <span style="font-size:0.8rem;font-weight:800;color:#00d395;">80%</span>
+            </div>
+            <div style="height:6px;background:rgba(255,255,255,0.1);border-radius:20px;overflow:hidden;">
+              <div style="height:100%;width:80%;background:linear-gradient(90deg,#00d395,#10b981);border-radius:20px;transition:width 0.6s ease;"></div>
+            </div>
+          </div>
+
+          {{-- Signal badge --}}
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+            <span style="
+              background:rgba(0,211,149,0.12);
+              border:1px solid rgba(0,211,149,0.3);
+              color:#00d395;
+              font-size:0.78rem;
+              font-weight:700;
+              padding:5px 14px;
+              border-radius:30px;
+              display:inline-flex;
+              align-items:center;
+              gap:6px;
+            ">
+              🟩 Strong Signal
+            </span>
+            <span style="font-size:0.78rem;color:rgba(255,255,255,0.55);">
+              ✅ High-probability signal! You are in a good position to earn significant profits.
+            </span>
+          </div>
+
+          {{-- Action buttons --}}
+          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+            <a href="{{ route('user.investments.deposit') }}" style="
+              display:inline-flex;align-items:center;gap:8px;
+              background:linear-gradient(135deg,#C9A227,#9E7C14);
+              color:#fff;font-weight:700;font-size:0.83rem;
+              padding:10px 22px;border-radius:10px;
+              text-decoration:none;transition:all 0.2s ease;
+              box-shadow:0 4px 16px rgba(201,162,39,0.3);
+            ">
+              <i class="fas fa-plus-circle"></i> Add Funds
+            </a>
+            <a href="{{ route('user.investments.bot') }}" style="
+              display:inline-flex;align-items:center;gap:8px;
+              background:rgba(255,255,255,0.08);
+              border:1px solid rgba(255,255,255,0.2);
+              color:#fff;font-weight:700;font-size:0.83rem;
+              padding:10px 22px;border-radius:10px;
+              text-decoration:none;transition:all 0.2s ease;
+            ">
+              <i class="fas fa-robot"></i> Trading Bot
+            </a>
+          </div>
+
+        </div>{{-- /content --}}
+      </div>{{-- /signal box --}}
+
     </div>
   </div>
 

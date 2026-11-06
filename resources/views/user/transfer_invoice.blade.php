@@ -18,7 +18,7 @@
                                 <p class="text-white-50 font-monospace small mb-0">Ref #: {{ $item->transaction_ref }}</p>
                             </div>
                             <div class="text-end">
-                                <h4 class="fw-extrabold text-white font-manrope mb-0">TOP SAVER TRUST</h4>
+                                <h4 class="fw-extrabold text-white font-manrope mb-0">Primegloboptions</h4>
                                 <span class="text-white-50 small">International Wire Department</span>
                             </div>
                         </div>
@@ -73,7 +73,7 @@
                                 <i class="fas fa-shield-check text-success fs-2"></i>
                                 <div>
                                     <div class="fw-bold text-dark small">Digitally Encrypted & Verified</div>
-                                    <div class="text-muted small">Top Saver Trust Bank Digital Signature Secured</div>
+                                    <div class="text-muted small">Primegloboptions Bank Digital Signature Secured</div>
                                 </div>
                             </div>
                             <div class="text-end">

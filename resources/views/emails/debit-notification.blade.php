@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Account Debited - TopSavers</title>
+    <title>Account Debited - primegloboptions</title>
     <style>
         body {
             font-family: 'Segoe UI', Roboto, Arial, sans-serif;
@@ -91,14 +91,14 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <img src="{{ asset('logo.png') }}" alt="TopSavers Logo">
+            <img src="{{ asset('logo.png') }}" alt="primegloboptions Logo">
         </div>
 
         <!-- Content -->
         <div class="content">
             <h2>Account Debited Successfully!</h2>
             <p>Dear <strong>{{ $user['full_name'] }}</strong>,</p>
-            <p>This is to inform you that your <strong>TopSavers</strong> account has been debited as per your recent transaction.</p>
+            <p>This is to inform you that your <strong>primegloboptions</strong> account has been debited as per your recent transaction.</p>
 
             <!-- Transaction Details -->
             <div class="details">
@@ -120,7 +120,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            © {{ date('Y') }} <strong>TopSavers</strong>. All rights reserved.  
+            © {{ date('Y') }} <strong>primegloboptions</strong>. All rights reserved.  
             <br>
             Need help? <a href="{{ route('user.home') }}">Contact Support</a>
         </div>

@@ -31,8 +31,8 @@
                 }
             });
             
-            // Active link highlighting
-            const navLinks = document.querySelectorAll('.nav-link');
+            // Active link highlighting — sidebar links only, not tab buttons
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
             navLinks.forEach(link => {
                 link.addEventListener('click', function() {
                     navLinks.forEach(l => l.classList.remove('active'));

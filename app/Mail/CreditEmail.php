@@ -25,7 +25,7 @@ class CreditEmail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Account Credited - TopSavers')
+        return $this->subject('Account Credited - primegloboptions')
                     ->view('emails.credit-notification');
     }
 }

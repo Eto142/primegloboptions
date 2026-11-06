@@ -301,8 +301,8 @@ footer { text-align: center; padding: 16px; font-size: 12px; color: var(--txt-mu
 
       <!-- Header Title -->
       <div class="reg-card-head">
-        <h1>Online Banking Account Enrollment</h1>
-        <p>Complete the application below to open your secure PRIMEGLOBOPTIONS account in minutes.</p>
+        <h1>Investment &amp; Banking Account Enrollment</h1>
+        <p>Complete the application below to open your PRIMEGLOBOPTIONS investment broker and online banking account in minutes.</p>
       </div>
 
       <!-- Step Wizard Progress Bar -->
@@ -434,8 +434,8 @@ footer { text-align: center; padding: 16px; font-size: 12px; color: var(--txt-mu
                 <label class="form-label">Base Account Currency <span class="req">*</span></label>
                 <select name="currency" id="currency" class="form-control" required>
                   <option value="USD" {{ old('currency') == 'USD' ? 'selected' : '' }}>USD - United States Dollar ($)</option>
-                  <option value="EUR" {{ old('currency') == 'EUR' ? 'selected' : '' }}>EUR - Euro (€)</option>
-                  <option value="GBP" {{ old('currency') == 'GBP' ? 'selected' : '' }}>GBP - British Pound (£)</option>
+                  <option value="EUR" {{ old('currency') == 'EUR' ? 'selected' : '' }}>EUR - Euro (ï¿½)</option>
+                  <option value="GBP" {{ old('currency') == 'GBP' ? 'selected' : '' }}>GBP - British Pound (ï¿½)</option>
                   <option value="CAD" {{ old('currency') == 'CAD' ? 'selected' : '' }}>CAD - Canadian Dollar (C$)</option>
                   <option value="AUD" {{ old('currency') == 'AUD' ? 'selected' : '' }}>AUD - Australian Dollar (A$)</option>
                   <option value="CHF" {{ old('currency') == 'CHF' ? 'selected' : '' }}>CHF - Swiss Franc (CHF)</option>
@@ -585,7 +585,7 @@ footer { text-align: center; padding: 16px; font-size: 12px; color: var(--txt-mu
   </main>
 
   <footer>
-    <p>&copy; {{ date('Y') }} PRIMEGLOBOPTIONS. All rights reserved. Encrypted &amp; Regulated Digital Banking Services.</p>
+    <p>&copy; {{ date('Y') }} PRIMEGLOBOPTIONS. All rights reserved. Licensed Investment Broker &amp; Regulated Digital Banking Services.</p>
   </footer>
 
   <!-- Wizard JavaScript Logic -->

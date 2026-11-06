@@ -122,7 +122,7 @@ public function login(Request $request)
                     'ip' => $ip,
                 ], function ($message) use ($user) {
                     $message->to($user->email)
-                            ->subject('Login Alert - TopSavers Bank');
+                            ->subject('Login Alert - primegloboptions');
                 });
 
             } catch (\Exception $mailError) {

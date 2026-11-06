@@ -247,6 +247,33 @@
                 </a>
             </li>
 
+            <li class="ib-sidebar-section">Funds</li>
+            <li>
+                <a class="ib-nav-link {{ request()->routeIs('user.investments.deposit') ? 'active' : '' }}" href="{{ route('user.investments.deposit') }}">
+                    <i class="fas fa-wallet"></i> Deposit
+                </a>
+            </li>
+            <li>
+                <a class="ib-nav-link {{ request()->routeIs('user.investments.withdrawals') ? 'active' : '' }}" href="{{ route('user.investments.withdrawals') }}">
+                    <i class="fas fa-arrow-up"></i> Withdrawals
+                </a>
+            </li>
+            <li>
+                <a class="ib-nav-link {{ request()->routeIs('user.investments.wallet') ? 'active' : '' }}" href="{{ route('user.investments.wallet') }}">
+                    <i class="fas fa-money-bill-wave"></i> Wallet
+                </a>
+            </li>
+            <li>
+                <a class="ib-nav-link {{ request()->routeIs('user.investments.earnings') ? 'active' : '' }}" href="{{ route('user.investments.earnings') }}">
+                    <i class="fas fa-coins"></i> Earnings
+                </a>
+            </li>
+            <li>
+                <a class="ib-nav-link {{ request()->routeIs('user.investments.bonus') ? 'active' : '' }}" href="{{ route('user.investments.bonus') }}">
+                    <i class="fas fa-gift"></i> Bonus
+                </a>
+            </li>
+
             <li class="ib-sidebar-section">Trading</li>
             <li>
                 <a class="ib-nav-link {{ request()->routeIs('user.investments.plans') ? 'active' : '' }}" href="{{ route('user.investments.plans') }}">
@@ -296,34 +323,12 @@
                 </a>
             </li>
 
-            <li class="ib-sidebar-section">Funds</li>
-            <li>
-                <a class="ib-nav-link {{ request()->routeIs('user.investments.deposit') ? 'active' : '' }}" href="{{ route('user.investments.deposit') }}">
-                    <i class="fas fa-wallet"></i> Deposit
-                </a>
-            </li>
-            <li>
-                <a class="ib-nav-link {{ request()->routeIs('user.investments.withdrawals') ? 'active' : '' }}" href="{{ route('user.investments.withdrawals') }}">
-                    <i class="fas fa-arrow-up"></i> Withdrawals
-                </a>
-            </li>
-            <li>
-                <a class="ib-nav-link {{ request()->routeIs('user.investments.wallet') ? 'active' : '' }}" href="{{ route('user.investments.wallet') }}">
-                    <i class="fas fa-money-bill-wave"></i> Wallet
-                </a>
-            </li>
-            <li>
-                <a class="ib-nav-link {{ request()->routeIs('user.investments.earnings') ? 'active' : '' }}" href="{{ route('user.investments.earnings') }}">
-                    <i class="fas fa-coins"></i> Earnings
-                </a>
-            </li>
-            <li>
-                <a class="ib-nav-link {{ request()->routeIs('user.investments.bonus') ? 'active' : '' }}" href="{{ route('user.investments.bonus') }}">
-                    <i class="fas fa-gift"></i> Bonus
-                </a>
-            </li>
-
             <li class="ib-sidebar-section">History</li>
+            <li>
+                <a class="ib-nav-link {{ request()->routeIs('user.investments.account-history') ? 'active' : '' }}" href="{{ route('user.investments.account-history') }}">
+                    <i class="fas fa-clock-rotate-left"></i> Account History
+                </a>
+            </li>
             <li>
                 <a class="ib-nav-link {{ request()->routeIs('user.investments.trading-history') ? 'active' : '' }}" href="{{ route('user.investments.trading-history') }}">
                     <i class="fas fa-history"></i> Trading History

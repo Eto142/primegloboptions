@@ -35,11 +35,22 @@
     }
 
     .crypto-box {
-        background: linear-gradient(135deg, rgba(201,162,39,0.12), rgba(15,29,53,0.8));
+        background-image: url("{{ asset('stock.jpg') }}");
+        background-size: cover;
+        background-position: center;
         border: 1px solid var(--border);
         border-radius: 15px; padding: 30px; color: #fff;
         box-shadow: 0 4px 8px rgba(0,0,0,0.1); min-height: 250px;
+        position: relative; overflow: hidden;
     }
+    .crypto-box::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: linear-gradient(135deg, rgba(6,11,24,0.82) 0%, rgba(13,21,37,0.72) 60%, rgba(6,11,24,0.60) 100%);
+        border-radius: 15px;
+        z-index: 0;
+    }
+    .crypto-box > * { position: relative; z-index: 1; }
     .crypto-box .amount { font-size: 1.8em; margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--gold); }
     .crypto-box b { font-size: 0.78rem; color: var(--text-muted); letter-spacing: 1px; }
 

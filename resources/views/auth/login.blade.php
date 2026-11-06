@@ -339,9 +339,9 @@ footer { text-align: center; padding: 16px; font-size: 12px; color: var(--txt-mu
       <!-- Left Brand Showcase Panel -->
       <div class="brand-panel">
         <div class="brand-panel-content">
-          <span class="brand-badge"><i class="ri-shield-check-fill"></i> Bank-Grade Protection</span>
-          <h2>Secure Digital Banking Portal</h2>
-          <p>Access your accounts, initiate instant global transfers, and manage high-interest savings securely.</p>
+          <span class="brand-badge"><i class="ri-shield-check-fill"></i> Investment Broker &amp; Online Banking</span>
+          <h2>Trade, Invest &amp; Bank — All in One Place</h2>
+          <p>Access your investment portfolio, execute live trades, initiate global transfers, and manage your online banking account securely.</p>
 
           <!-- Virtual Card -->
           <div class="v-card">
@@ -360,8 +360,10 @@ footer { text-align: center; padding: 16px; font-size: 12px; color: var(--txt-mu
           </div>
 
           <ul class="brand-feats">
-            <li><i class="ri-checkbox-circle-fill"></i> 256-Bit End-to-End SSL Encryption</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Live Forex, Stocks &amp; Crypto Trading</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Managed Investment Plans &amp; Portfolios</li>
             <li><i class="ri-checkbox-circle-fill"></i> Real-Time Global Wire Transfers</li>
+            <li><i class="ri-checkbox-circle-fill"></i> 256-Bit End-to-End SSL Encryption</li>
             <li><i class="ri-checkbox-circle-fill"></i> 24/7 Dedicated Support Desk</li>
           </ul>
         </div>
@@ -372,7 +374,7 @@ footer { text-align: center; padding: 16px; font-size: 12px; color: var(--txt-mu
         <div class="form-panel-head">
           <img src="{{ asset('home/asset/img/logo.png') }}" alt="PRIMEGLOBOPTIONS">
           <h1>Welcome Back</h1>
-          <p>Sign in to your online banking dashboard</p>
+          <p>Sign in to your investment &amp; banking dashboard</p>
         </div>
 
         <div id="alert-area">
@@ -435,7 +437,7 @@ footer { text-align: center; padding: 16px; font-size: 12px; color: var(--txt-mu
   </main>
 
   <footer>
-    <p>&copy; {{ date('Y') }} PRIMEGLOBOPTIONS. All rights reserved. Encrypted &amp; Secure Digital Banking.</p>
+    <p>&copy; {{ date('Y') }} PRIMEGLOBOPTIONS. All rights reserved. Licensed Investment Broker &amp; Secure Digital Banking Services.</p>
   </footer>
 
   <script>

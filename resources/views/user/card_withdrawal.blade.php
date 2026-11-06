@@ -9,8 +9,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
     <title>
-        Dashboard - Top Saver Trust Bank </title>
-    <meta name="description" content="Top Saver Trust Bank Mobile Banking">
+        Dashboard - Primegloboptions Bank </title>
+    <meta name="description" content="Primegloboptions Bank Mobile Banking">
     <meta name="keywords"
         content="bootstrap, wallet, banking, fintech mobile template, cordova, phonegap, mobile, html, responsive" />
     <link rel="icon" type="image/png" href="{{asset('asset/img/favicon.png" sizes="32x32') }}">
@@ -59,7 +59,7 @@
                 </a>
             </div>
             <div class="pageTitle">
-                Top Saver Trust Bank Card Withdrawal </div>
+                Primegloboptions Bank Card Withdrawal </div>
 
 
             <div class="right">

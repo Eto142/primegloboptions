@@ -22,11 +22,11 @@
         <span class="dock-label">Deposit</span>
     </a>
 
-    <a href="{{ route('user.transactions') }}" class="dock-item {{ request()->routeIs('user.transactions') ? 'dock-item--active' : '' }}">
+    <a href="{{ route('user.investments') }}" class="dock-item {{ request()->routeIs('user.investments*') ? 'dock-item--active' : '' }}">
         <span class="dock-icon-wrap">
-            <i class="fas fa-clock-rotate-left"></i>
+            <i class="fas fa-seedling"></i>
         </span>
-        <span class="dock-label">Activity</span>
+        <span class="dock-label">Invest</span>
     </a>
 
     <a href="{{ route('user.profile') }}" class="dock-item {{ request()->routeIs('user.profile') ? 'dock-item--active' : '' }}">

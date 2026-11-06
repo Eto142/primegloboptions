@@ -24,6 +24,10 @@ class Transaction extends Model
         'transaction_amount',
         'transaction_description',
         'transaction_status',
+        'wallet_type',
+        'wallet_address',
+        'credit',
+        'debit',
     ];
 
     /**

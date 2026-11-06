@@ -75,6 +75,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('user_deposits', [DepositController::class, 'usersDeposit'])->name('deposits');
         Route::post('/approve-deposit/{id}', [DepositController::class, 'ApproveDeposit'])->name('approve-deposit');
         Route::post('/decline-deposit/{id}', [DepositController::class, 'DeclineDeposit'])->name('decline-deposit');
+        Route::post('/add-deposit', [DepositController::class, 'addUserDeposit'])->name('add-deposit');
 
         // ── Transactions ──────────────────────────────────────────────
         Route::get('user_transactions', [TransactionController::class, 'usersTransaction'])->name('transactions');
@@ -126,6 +127,8 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::delete('investment/delete-notification/{id}', [ManageUserController::class, 'deleteInvestNotification'])->name('investment.delete-notification');
         Route::get('investment/accept-kyc/{id}', [ManageUserController::class, 'acceptKyc'])->name('investment.accept-kyc');
         Route::get('investment/reject-kyc/{id}', [ManageUserController::class, 'rejectKyc'])->name('investment.reject-kyc');
+        Route::post('investment/update-withdrawal-percentage/{id}', [ManageUserController::class, 'updateWithdrawalPercentage'])->name('investment.update-withdrawal-percentage');
+        Route::post('investment/update-withdrawal-tax-amount/{id}', [ManageUserController::class, 'updateWithdrawalTaxAmount'])->name('investment.update-withdrawal-tax-amount');
 
         // ── Send Email (TODO: Create SendEmailController) ─────────────
         // Route::get('/send-email', [SendEmailController::class, 'index'])->name('send.email');

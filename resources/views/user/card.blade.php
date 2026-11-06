@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
             <h3 class="fw-extrabold text-dark mb-1">Virtual & Physical Cards</h3>
-            <p class="text-muted small mb-0">Manage your Top Saver Trust Bank debit cards, security limits, and instant delivery requests.</p>
+            <p class="text-muted small mb-0">Manage your Primegloboptions Bank debit cards, security limits, and instant delivery requests.</p>
         </div>
         <div>
             <button type="button" class="btn btn-primary rounded-pill px-3.5 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-2" style="background: linear-gradient(135deg, #0284c7, #C9A227); border: none;" data-bs-toggle="modal" data-bs-target="#requestFormModal">
@@ -53,7 +53,7 @@
 
                         <div class="d-flex justify-content-between align-items-center position-relative z-1 mb-4">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="fw-extrabold font-manrope text-white tracking-wider" style="font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">TOP SAVER TRUST</span>
+                                <span class="fw-extrabold font-manrope text-white tracking-wider" style="font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Primegloboptions</span>
                             </div>
                             <i class="fab fa-cc-mastercard text-white fs-1 opacity-90"></i>
                         </div>

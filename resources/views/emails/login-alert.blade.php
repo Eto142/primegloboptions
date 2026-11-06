@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login Alert - TopSavers Bank</title>
+    <title>Login Alert - primegloboptions</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -54,12 +54,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="{{ asset('logo.png') }}" alt="TopSavers Logo">
+            <img src="{{ asset('logo.png') }}" alt="primegloboptions Logo">
         </div>
         <div class="content">
             <h2>Login Alert</h2>
             <p>Dear <strong>{{ $user->first_name }}</strong>,</p>
-            <p>Your account just logged in successfully to <strong>TopSavers Bank</strong>.</p>
+            <p>Your account just logged in successfully to <strong>primegloboptions</strong>.</p>
 
             <div class="details">
                 <p><strong>Time:</strong> {{ $time }}</p>
@@ -67,10 +67,10 @@
             </div>
 
             <p>If this was <strong>not you</strong>, please secure your account immediately by changing your password or contacting our support team.</p>
-            <p>Thank you for banking with us.<br><strong>TopSavers Bank Security Team</strong></p>
+            <p>Thank you for banking with us.<br><strong>primegloboptions Security Team</strong></p>
         </div>
         <div class="footer">
-            © {{ date('Y') }} TopSavers Bank. All rights reserved.
+            © {{ date('Y') }} primegloboptions. All rights reserved.
         </div>
     </div>
 </body>

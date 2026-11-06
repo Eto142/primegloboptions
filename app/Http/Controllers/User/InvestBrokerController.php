@@ -14,6 +14,7 @@ use App\Models\InvestNotification;
 use App\Models\Transaction;
 use App\Models\Deposit;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Models\Withdrawal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -297,11 +298,16 @@ class InvestBrokerController extends Controller
     }
 
     /**
-     * 19. Trading history.
+     * 19. Trading history — real transaction records for this user.
      */
     public function tradingHistory()
     {
+        $uid  = Auth::id();
         $data = $this->balanceData();
+
+        $data['transactions'] = Transaction::where('user_id', $uid)
+                                            ->orderBy('created_at', 'desc')
+                                            ->get();
 
         return view('user.investment-broker.trading-history', $data);
     }
@@ -317,23 +323,211 @@ class InvestBrokerController extends Controller
     }
 
     /**
-     * 21. Deposit page.
+     * 21. Deposit page — Step 1: amount + destination form.
+     *     Also loads this user's deposit history for display below the form.
      */
     public function deposit()
     {
+        $uid  = Auth::id();
         $data = $this->balanceData();
+
+        $data['deposits'] = Deposit::where('user_id', $uid)
+                                   ->orderBy('created_at', 'desc')
+                                   ->get();
 
         return view('user.investment-broker.deposit', $data);
     }
 
     /**
-     * 22. Withdrawals page.
+     * 21a. Deposit Step 1 POST — validate input, store in session,
+     *       redirect to method picker (Step 2).
+     */
+    public function getDeposit(Request $request)
+    {
+        $request->validate([
+            'amount'       => 'required|numeric|min:10',
+            'trading_name' => 'required|string|max:60',
+        ]);
+
+        $request->session()->put('invest_deposit', [
+            'amount'       => $request->input('amount'),
+            'trading_name' => $request->input('trading_name'),
+        ]);
+
+        return redirect()->route('user.investments.deposit.method');
+    }
+
+    /**
+     * 21b. Deposit Step 2 GET — payment method picker.
+     */
+    public function depositMethod(Request $request)
+    {
+        $sessionData = $request->session()->get('invest_deposit');
+
+        if (!$sessionData) {
+            return redirect()->route('user.investments.deposit')
+                ->with('error', 'Please start your deposit from the beginning.');
+        }
+
+        $data         = $this->balanceData();
+        $data['data'] = $sessionData;
+
+        return view('user.investment-broker.deposit-method', $data);
+    }
+
+    /**
+     * 21c. Deposit Step 2 POST — user picks BTC / USDT / ETH.
+     *       Creates a Deposit + Transaction record (pending), then shows
+     *       the wallet address (Step 3).
+     */
+    public function makeDeposit(Request $request)
+    {
+        $request->validate([
+            'amount'       => 'required|numeric|min:10',
+            'trading_name' => 'required|string|max:60',
+            'item'         => 'required|in:Bitcoin,Usdt,Ethereum',
+        ]);
+
+        $transactionId = (string) rand(10000000, 99999999);
+
+        // Map item label to wallet_type value
+        $walletTypeMap = [
+            'Bitcoin'  => 'BTC',
+            'Usdt'     => 'USDT',
+            'Ethereum' => 'ETH',
+        ];
+
+        DB::beginTransaction();
+        try {
+            // Record the pending deposit using actual table columns
+            Deposit::create([
+                'user_id'        => Auth::id(),
+                'transaction_id' => $transactionId,
+                'deposit_type'   => 'crypto',
+                'amount'         => $request->input('amount'),
+                'status'         => 0,
+            ]);
+
+            // Record the transaction ledger entry using actual table columns
+            Transaction::create([
+                'user_id'                 => Auth::id(),
+                'transaction_id'          => $transactionId,
+                'transaction_type'        => 'Credit',
+                'transaction'             => 'Deposit',
+                'transaction_amount'      => $request->input('amount'),
+                'wallet_type'             => $walletTypeMap[$request->input('item')] ?? $request->input('item'),
+                'transaction_description' => 'Crypto deposit — ' . $request->input('trading_name')
+                                             . ' via ' . $request->input('item'),
+                'transaction_status'      => 'pending',
+            ]);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withErrors(['error' => 'Could not record your deposit. Please try again.']);
+        }
+
+        // Store payment context in session for the address page
+        $request->session()->put('invest_deposit', [
+            'amount'       => $request->input('amount'),
+            'trading_name' => $request->input('trading_name'),
+            'item'         => $request->input('item'),
+        ]);
+
+        return redirect()->route('user.investments.deposit.address');
+    }
+
+    /**
+     * 21d. Deposit Step 3 GET — show wallet address + QR + countdown.
+     *      Loads the active crypto wallet rows from this project's wallets table.
+     *      Merges all rows so addresses spread across multiple records are all found.
+     */
+    public function depositAddress(Request $request)
+    {
+        $sessionData = $request->session()->get('invest_deposit');
+
+        if (!$sessionData || empty($sessionData['item'])) {
+            return redirect()->route('user.investments.deposit')
+                ->with('error', 'Session expired. Please start your deposit again.');
+        }
+
+        // Merge all active crypto rows into one object so we always find the right address
+        $rows = Wallet::where('method', 'crypto')
+                      ->where('status', 'active')
+                      ->get();
+
+        // Build a single merged wallet with the first non-empty value per field
+        $merged = (object)[
+            'bitcoin_address'  => $rows->first(fn($r) => !empty($r->bitcoin_address))?->bitcoin_address,
+            'ethereum_address' => $rows->first(fn($r) => !empty($r->ethereum_address))?->ethereum_address,
+            'usdt_address'     => $rows->first(fn($r) => !empty($r->usdt_address))?->usdt_address,
+        ];
+
+        $data           = $this->balanceData();
+        $data['data']   = $sessionData;
+        $data['wallet'] = $merged;
+
+        return view('user.investment-broker.deposit-address', $data);
+    }
+
+    /**
+     * 22. Withdrawals page — form + history for this user.
      */
     public function withdrawals()
     {
+        $uid  = Auth::id();
         $data = $this->balanceData();
 
+        $data['withdrawals'] = Withdrawal::where('user_id', $uid)
+                                          ->orderBy('created_at', 'desc')
+                                          ->get();
+
         return view('user.investment-broker.withdrawals', $data);
+    }
+
+    /**
+     * 22a. Store a new withdrawal request.
+     */
+    public function makeWithdrawal(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'mode'   => 'required|string',
+        ]);
+
+        $transactionId = (string) rand(10000000, 99999999);
+
+        Withdrawal::create([
+            'user_id'            => Auth::id(),
+            'transaction_id'     => $transactionId,
+            'amount'             => $request->input('amount'),
+            'mode'               => $request->input('mode'),
+            'account_name'       => $request->input('account_name'),
+            'account_number'     => $request->input('account_number'),
+            'bank_name'          => $request->input('bank_name'),
+            'swift'              => $request->input('swift'),
+            'bank_routing_number'=> $request->input('bank_routing_number'),
+            'bank_country'       => $request->input('bank_country'),
+            'crypto_type'        => $request->input('crypto_type'),
+            'wallet_address'     => $request->input('wallet_address'),
+            'status'             => 0,
+        ]);
+
+        Transaction::create([
+            'user_id'                 => Auth::id(),
+            'transaction_id'          => $transactionId,
+            'transaction_type'        => 'Debit',
+            'transaction'             => 'Withdrawal',
+            'transaction_amount'      => $request->input('amount'),
+            'wallet_type'             => $request->input('crypto_type'),
+            'wallet_address'          => $request->input('wallet_address'),
+            'transaction_description' => 'Withdrawal via ' . $request->input('mode'),
+            'transaction_status'      => 'pending',
+        ]);
+
+        return redirect()->route('user.investments.withdrawals')
+                         ->with('success', 'Withdrawal request submitted successfully. Awaiting admin approval.');
     }
 
     /**
@@ -500,5 +694,28 @@ class InvestBrokerController extends Controller
             ->update(['is_read' => 1]);
 
         return redirect()->back();
+    }
+
+    /**
+     * 32. Combined account history — deposits, withdrawals, all transactions.
+     */
+    public function accountHistory()
+    {
+        $uid  = Auth::id();
+        $data = $this->balanceData();
+
+        $data['deposits']     = Deposit::where('user_id', $uid)
+                                        ->orderBy('created_at', 'desc')
+                                        ->get();
+
+        $data['withdrawals']  = Withdrawal::where('user_id', $uid)
+                                           ->orderBy('created_at', 'desc')
+                                           ->get();
+
+        $data['transactions'] = Transaction::where('user_id', $uid)
+                                            ->orderBy('created_at', 'desc')
+                                            ->get();
+
+        return view('user.investment-broker.account-history', $data);
     }
 }

@@ -25,7 +25,7 @@ class DebitEmail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Account Debited - TopSavers')
+        return $this->subject('Account Debited - primegloboptions')
                     ->view('emails.debit-notification');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Deposit;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -68,4 +69,41 @@ public function DeclineDeposit(Request $request, $id)
     // Mail::to($email)->send(new declineDepositEmail($data));
     return redirect()->back()->with('message', 'Deposit Has Been Declined Successfully');
 }
+
+    /**
+     * Admin manually credits a deposit for a user (also records the transaction).
+     */
+    public function addUserDeposit(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'nullable|string|max:120',
+            'deposit_date' => 'nullable|date',
+            'description' => 'nullable|string',
+        ]);
+
+        $transactionId = (string) rand(10000000, 99999999);
+        $user = User::findOrFail($request->user_id);
+
+        Deposit::create([
+            'user_id'        => $request->user_id,
+            'transaction_id' => $transactionId,
+            'amount'         => $request->amount,
+            'email'          => $user->email,
+            'status'         => 1,
+        ]);
+
+        Transaction::create([
+            'user_id'                 => $request->user_id,
+            'transaction_id'          => $transactionId,
+            'transaction_type'        => 'Credit',
+            'transaction'             => 'Deposit',
+            'transaction_amount'      => $request->amount,
+            'transaction_description' => $request->description ?? 'Admin deposit',
+            'transaction_status'      => '1',
+        ]);
+
+        return back()->with('success', 'Deposit added successfully.');
+    }
 }

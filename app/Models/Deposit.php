@@ -13,11 +13,12 @@ class Deposit extends Model
     protected $fillable = [
         'user_id',
         'transaction_id',
+        'deposit_type',
         'amount',
         'email',
         'status',
         'front_cheque',
-        'license',
+        'back_cheque',
     ];
 
     /**
