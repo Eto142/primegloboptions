@@ -53,6 +53,24 @@
     .crypto-box > * { position: relative; z-index: 1; }
     .crypto-box .amount { font-size: 1.8em; margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--gold); }
     .crypto-box b { font-size: 0.78rem; color: var(--text-muted); letter-spacing: 1px; }
+    .crypto-stats { display: flex; align-items: center; gap: 16px; }
+    .crypto-stat { flex: 1; min-width: 0; }
+    .crypto-stat:nth-child(2) { text-align: center; }
+    .crypto-stat:last-child { text-align: right; }
+    @media (max-width: 575px) {
+        .crypto-box { padding: 20px; }
+        .crypto-stats { flex-direction: column; align-items: stretch; gap: 0; }
+        .crypto-stat {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.12); text-align: left;
+        }
+        .crypto-stat:last-child { border-bottom: 0; }
+        .crypto-stat > b { order: 0; }
+        .crypto-box .amount {
+            order: 1; font-size: clamp(0.95rem, 5vw, 1.25rem); margin: 0; text-align: right;
+            overflow-wrap: anywhere;
+        }
+    }
 
     .progress { height: 24px; background: #14161b; border-radius: 50px; overflow: hidden; box-shadow: inset 0 0 12px rgba(0,0,0,0.6); margin-top: 15px; }
     .progress-bar { height: 100%; border-radius: 50px; transition: width 1.2s ease-in-out; position: relative; }
@@ -179,16 +197,16 @@
 
 {{-- Balance / Profit / Deposit Box --}}
 <div class="crypto-box">
-    <div class="row align-items-center text-center">
-        <div class="col-4 text-start">
+    <div class="crypto-stats">
+        <div class="crypto-stat">
             <div class="amount">${{ number_format($user_balance ?? 0, 2) }}</div>
             <b>BALANCE</b>
         </div>
-        <div class="col-4">
+        <div class="crypto-stat">
             <div class="amount">${{ number_format($profit ?? 0, 2) }}</div>
             <b>PROFIT</b>
         </div>
-        <div class="col-4 text-end">
+        <div class="crypto-stat">
             <div class="amount">${{ number_format($deposit ?? 0, 2) }}</div>
             <b>DEPOSIT</b>
         </div>
