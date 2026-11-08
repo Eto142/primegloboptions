@@ -107,9 +107,18 @@ public function login(Request $request)
 
         // ✅ Attempt login
         if (Auth::attempt([$fieldType => $loginInput, 'password' => $password], $remember)) {
-            $request->session()->regenerate();
-
             $user = Auth::user();
+            if ($message = $user->accountRestrictionMessage()) {
+                Auth::guard('web')->logout();
+                $request->session()->regenerate();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                ], 403);
+            }
+
+            $request->session()->regenerate();
 
             // ✅ Send professional login alert email
             try {
@@ -160,9 +169,8 @@ public function login(Request $request)
 
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        Auth::guard('web')->logout();
+        $request->session()->regenerate();
 
         return redirect('/login')->with('success', 'Logged out successfully!');
     }

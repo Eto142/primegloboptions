@@ -221,6 +221,45 @@ class ManageUserController extends Controller
         return back()->with('status', 'Payment status updated successfully for ' . $user->first_name);
     }
 
+    public function updateAccountStatus(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'status_type' => 'required|in:suspended,on_hold,frozen',
+            'status' => 'required|in:0,1',
+        ]);
+
+        $statusColumns = [
+            'suspended' => 'is_suspended',
+            'on_hold' => 'is_on_hold',
+            'frozen' => 'is_frozen',
+        ];
+        $statusLabels = [
+            'suspended' => 'Suspension',
+            'on_hold' => 'Account hold',
+            'frozen' => 'Account freeze',
+        ];
+
+        $user->{$statusColumns[$validated['status_type']]} = $validated['status'] === '1';
+        $user->save();
+
+        $action = $validated['status'] === '1' ? 'enabled' : 'removed';
+
+        return back()->with('status', $statusLabels[$validated['status_type']] . ' ' . $action . ' for ' . $user->first_name);
+    }
+
+    public function updateLoanEligibility(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->eligible_loan = $validated['amount'];
+        $user->save();
+
+        return back()->with('status', 'Loan eligibility updated successfully for ' . $user->first_name);
+    }
+
     // ── Investment broker management (per-user) ─────────────────────────
 
     // Update withdrawal tax code (investment broker account control)

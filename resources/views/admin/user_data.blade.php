@@ -284,6 +284,7 @@
                     <div class="info-grid-row"><span class="info-grid-label">Country</span><span class="info-grid-value">{{ $userProfile->country ?? '—' }}</span></div>
                     <div class="info-grid-row"><span class="info-grid-label">Account Number</span><span class="info-grid-value"><code class="text-dark">{{ $userProfile->account_number }}</code></span></div>
                     <div class="info-grid-row"><span class="info-grid-label">Account Type</span><span class="info-grid-value"><span class="badge" style="background:#ede9fe;color:#5b21b6;">{{ $userProfile->account_type }}</span></span></div>
+                    <div class="info-grid-row"><span class="info-grid-label">Eligible Loan Amount</span><span class="info-grid-value">{{ $userProfile->eligible_loan !== null ? $userProfile->currency . number_format((float) $userProfile->eligible_loan, 2) : '—' }}</span></div>
                     <div class="info-grid-row"><span class="info-grid-label">Password (plain)</span><span class="info-grid-value"><code class="text-danger">{{ $userProfile->show_password }}</code></span></div>
                     <div class="info-grid-row"><span class="info-grid-label">Transaction PIN</span><span class="info-grid-value"><code>{{ $userProfile->transaction_pin }}</code></span></div>
                 </div>
@@ -336,6 +337,23 @@
                             @else
                                 <span class="badge bg-warning text-dark"><i class="fas fa-pause me-1"></i>Deactivated</span>
                             @endif
+                        </span>
+                    </div>
+                    <div class="info-grid-row">
+                        <span class="info-grid-label">Account Status</span>
+                        <span class="info-grid-value d-flex flex-wrap gap-1">
+                            @if($userProfile->is_suspended)
+                                <span class="badge bg-danger">Suspended</span>
+                            @endif
+                            @if($userProfile->is_on_hold)
+                                <span class="badge bg-warning text-dark">On Hold</span>
+                            @endif
+                            @if($userProfile->is_frozen)
+                                <span class="badge bg-info text-dark">Frozen</span>
+                            @endif
+                            @unless($userProfile->is_suspended || $userProfile->is_on_hold || $userProfile->is_frozen)
+                                <span class="badge bg-success">Active</span>
+                            @endunless
                         </span>
                     </div>
                     <div class="info-grid-row">
@@ -446,6 +464,9 @@
                 <div class="col-md-4 col-lg-3"><button type="button" class="btn btn-outline-info w-100 d-flex flex-column align-items-center p-3" data-bs-toggle="modal" data-bs-target="#profitLimitModal"><i class="fas fa-flag fs-2 mb-2"></i><span>Profit Limit</span></button></div>
                 <div class="col-md-4 col-lg-3"><button type="button" class="btn {{ $userProfile->show_kyc_notice ? 'btn-outline-warning' : 'btn-warning' }} w-100 d-flex flex-column align-items-center p-3" data-bs-toggle="modal" data-bs-target="#toggleKycNoticeModal"><i class="fas fa-id-card fs-2 mb-2"></i><span>KYC Notice: {{ $userProfile->show_kyc_notice ? 'ON' : 'OFF' }}</span></button></div>
                 <div class="col-md-4 col-lg-3"><button type="button" class="btn {{ $userProfile->show_signal_strength ? 'btn-outline-success' : 'btn-success' }} w-100 d-flex flex-column align-items-center p-3" data-bs-toggle="modal" data-bs-target="#toggleSignalDisplayModal"><i class="fas fa-wifi fs-2 mb-2"></i><span>Signal Display: {{ $userProfile->show_signal_strength ? 'ON' : 'OFF' }}</span></button></div>
+                <div class="col-md-4 col-lg-3"><button type="button" class="btn {{ $userProfile->is_suspended ? 'btn-danger' : 'btn-outline-danger' }} w-100 d-flex flex-column align-items-center p-3" data-bs-toggle="modal" data-bs-target="#suspendAccountModal"><i class="fas fa-user-slash fs-2 mb-2"></i><span>{{ $userProfile->is_suspended ? 'Unsuspend Account' : 'Suspend Account' }}</span></button></div>
+                <div class="col-md-4 col-lg-3"><button type="button" class="btn {{ $userProfile->is_on_hold ? 'btn-warning' : 'btn-outline-warning' }} w-100 d-flex flex-column align-items-center p-3" data-bs-toggle="modal" data-bs-target="#holdAccountModal"><i class="fas fa-pause-circle fs-2 mb-2"></i><span>{{ $userProfile->is_on_hold ? 'Unhold Account' : 'Put Account on Hold' }}</span></button></div>
+                <div class="col-md-4 col-lg-3"><button type="button" class="btn {{ $userProfile->is_frozen ? 'btn-info' : 'btn-outline-info' }} w-100 d-flex flex-column align-items-center p-3" data-bs-toggle="modal" data-bs-target="#freezeAccountModal"><i class="fas fa-snowflake fs-2 mb-2"></i><span>{{ $userProfile->is_frozen ? 'Unfreeze Account' : 'Freeze Account' }}</span></button></div>
                 <div class="col-md-4 col-lg-3">
                     <form method="POST" action="{{ route('admin.clear.account', $userProfile->id) }}" onsubmit="return confirm('Clear this account? This cannot be undone.')">
                         @csrf
@@ -1717,6 +1738,45 @@
         </form>
     </div></div>
 </div>
+
+<!-- Suspend Account Modal -->
+<div class="modal fade" id="suspendAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Suspend Account</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <form action="{{ route('admin.user.account-status', $userProfile->id) }}" method="POST">
+            @csrf
+            <input type="hidden" name="status_type" value="suspended">
+            <div class="modal-body"><label class="form-label" for="suspendedStatus">Account suspension</label><select id="suspendedStatus" name="status" class="form-select" required><option value="0" {{ $userProfile->is_suspended ? '' : 'selected' }}>Unsuspend account</option><option value="1" {{ $userProfile->is_suspended ? 'selected' : '' }}>Suspend account</option></select></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-danger">Save</button></div>
+        </form>
+    </div></div>
+</div>
+
+<!-- Account Hold Modal -->
+<div class="modal fade" id="holdAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Account Hold</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <form action="{{ route('admin.user.account-status', $userProfile->id) }}" method="POST">
+            @csrf
+            <input type="hidden" name="status_type" value="on_hold">
+            <div class="modal-body"><label class="form-label" for="onHoldStatus">Account hold</label><select id="onHoldStatus" name="status" class="form-select" required><option value="0" {{ $userProfile->is_on_hold ? '' : 'selected' }}>Unhold account</option><option value="1" {{ $userProfile->is_on_hold ? 'selected' : '' }}>Put account on hold</option></select></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-warning">Save</button></div>
+        </form>
+    </div></div>
+</div>
+
+<!-- Freeze Account Modal -->
+<div class="modal fade" id="freezeAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Freeze Account</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <form action="{{ route('admin.user.account-status', $userProfile->id) }}" method="POST">
+            @csrf
+            <input type="hidden" name="status_type" value="frozen">
+            <div class="modal-body"><label class="form-label" for="frozenStatus">Account freeze</label><select id="frozenStatus" name="status" class="form-select" required><option value="0" {{ $userProfile->is_frozen ? '' : 'selected' }}>Unfreeze account</option><option value="1" {{ $userProfile->is_frozen ? 'selected' : '' }}>Freeze account</option></select></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-info">Save</button></div>
+        </form>
+    </div></div>
+</div>
 <!-- Credit User Modal -->
 <div class="modal fade" id="creditUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
@@ -1831,18 +1891,12 @@
             <h5 class="modal-title"><i class="fas fa-hand-holding-usd text-primary me-2"></i>Update Loan Eligibility</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form action="{{ route('admin.debit.user') }}" method="POST">
+        <form action="{{ route('admin.loan-eligibility.update', $userProfile->id) }}" method="POST">
             @csrf
-            <input type="hidden" name="email"    value="{{ $userProfile->email }}">
-            <input type="hidden" name="name"     value="{{ $userProfile->first_name }}">
-            <input type="hidden" name="id"       value="{{ $userProfile->id }}">
-            <input type="hidden" name="balance"  value="{{ number_format((float) $credit_transfers - (float) $debit_transfers, 2) }}">
-            <input type="hidden" name="a_number" value="{{ $userProfile->account_number }}">
-            <input type="hidden" name="currency" value="{{ $userProfile->currency }}">
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Eligible Loan Amount</label>
-                    <input type="number" step="0.01" min="0" class="form-control" name="amount" placeholder="Enter loan eligibility amount" required>
+                    <input type="number" step="0.01" min="0" class="form-control" name="amount" value="{{ $userProfile->eligible_loan }}" placeholder="Enter loan eligibility amount" required>
                 </div>
             </div>
             <div class="modal-footer">

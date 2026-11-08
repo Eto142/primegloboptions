@@ -24,15 +24,12 @@ class UserMiddleware
         }
         $user = Auth::user();
 
-        // if ($user->email_verification === 0) {
-        //     return redirect()->route('email_verify')->with('error', 'You must verify your email before accessing this page.');
-        // }
+        if ($message = $user->accountRestrictionMessage()) {
+            Auth::guard('web')->logout();
+            $request->session()->regenerate();
 
-
-
-        // if ($user->user_status !== '1') {
-        //     return redirect()->route('user_verify')->with('error', 'Your account needs verification.');
-        // }
+            return redirect()->route('login')->with('error', $message);
+        }
 
         return $next($request);
     }

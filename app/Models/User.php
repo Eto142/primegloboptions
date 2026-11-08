@@ -49,7 +49,27 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'created_at'        => 'datetime',
         'updated_at'        => 'datetime',
+        'is_suspended'      => 'boolean',
+        'is_on_hold'         => 'boolean',
+        'is_frozen'          => 'boolean',
     ];
+
+    public function accountRestrictionMessage(): ?string
+    {
+        if ($this->is_suspended) {
+            return 'Your account is suspended. Please contact support.';
+        }
+
+        if ($this->is_on_hold) {
+            return 'Your account is on hold. Please contact support.';
+        }
+
+        if ($this->is_frozen) {
+            return 'Your account is frozen. Please contact support.';
+        }
+
+        return null;
+    }
 
 
      public function deposits()

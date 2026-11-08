@@ -46,6 +46,8 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::delete('/delete/{id}', [ManageUserController::class, 'deleteUser'])->name('delete');
         Route::post('/clear-account/{id}', [ManageUserController::class, 'clearAccount'])->name('clear.account');
         Route::post('/updatepaymentstatus', [ManageUserController::class, 'updatePaymentStatus'])->name('updatepaymentstatus');
+        Route::post('/users/{user}/account-status', [ManageUserController::class, 'updateAccountStatus'])->name('user.account-status');
+        Route::post('/users/{id}/loan-eligibility', [ManageUserController::class, 'updateLoanEligibility'])->name('loan-eligibility.update');
 
         // ── Manage Cards ──────────────────────────────────────────────
         Route::get('user_cards', [ManageCardController::class, 'UsersCards'])->name('cards');

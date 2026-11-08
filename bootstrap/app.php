@@ -23,8 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         //
-        
-          $middleware->alias([
+
+        $middleware->web(replace: [
+            \Illuminate\Session\Middleware\StartSession::class => \App\Http\Middleware\StartAdminAndUserSessions::class,
+        ]);
+
+        $middleware->alias([
             'user' => \App\Http\Middleware\UserMiddleware::class,
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,

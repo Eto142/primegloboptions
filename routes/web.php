@@ -101,7 +101,7 @@ Route::post('/logout', [App\Http\Controllers\Auth\AuthController::class, 'logout
 
 
 
-Route::prefix('user')->as('user.')->middleware('auth')->group(function () {
+Route::prefix('user')->as('user.')->middleware(['auth', 'user'])->group(function () {
     Route::get('/home', [DashboardController::class, 'index'])->name('home'); // becomes 'user.home'
     Route::get('/alltransactions', [DashboardController::class, 'Alltransactions'])->name('transactions'); // becomes 'user.transactions'
     Route::get('/alert', [DashboardController::class, 'Alert'])->name('alert'); // becomes 'user.alert'
