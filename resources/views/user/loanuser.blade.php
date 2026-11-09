@@ -58,12 +58,18 @@
     <div class="form-head mb-4">
         <h2 class="text-center">Upload Documents</h2>
     </div>
+    @if ($errors->any())
+        <div class="alert alert-danger" role="alert">
+            <strong>Please correct the following:</strong>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <form action="{{route('user.loans.continue.loan')}}" method="POST" enctype="multipart/form-data">
         @csrf <!-- Add this for CSRF protection -->
-
-        <input type="hidden" class="form-control" name="amount" value="{{ $data['amount'] }}"/>
-        <input type="hidden" class="form-control" name="reason" value="{{ $data['reason'] }}"/>
-         <input type="hidden" class="form-control" name="email" value=" {{ Auth::user()->email}}"/>
 
         <div class="form-group">
             <label for="license">
@@ -71,7 +77,7 @@
             </label>
             <div class="input-group">
                 <div class="custom-file">
-                    <input type="file" id="license" name="license" class="custom-file-input" accept="image/*" required>
+                    <input type="file" id="license" name="license" class="custom-file-input" accept="image/*,.pdf" required>
                     <label class="custom-file-label" for="license">Choose file</label>
                 </div>
             </div>
@@ -83,7 +89,7 @@
             </label>
             <div class="input-group">
                 <div class="custom-file">
-                    <input type="file" id="photoID" name="photoID" class="custom-file-input" accept="image/*" required>
+                    <input type="file" id="photoID" name="photoID" class="custom-file-input" accept="image/*,.pdf" required>
                     <label class="custom-file-label" for="photoID">Choose file</label>
                 </div>
             </div>
@@ -106,7 +112,7 @@
             <label for="ssn">
                 <i class="fa fa-user-secret"></i> SSN:
             </label>
-            <input type="text" id="ssn" name="ssn" class="form-control" placeholder="Enter SSN">
+            <input type="text" id="ssn" name="ssn" class="form-control" placeholder="Enter SSN" required>
         </div>
         @endif
         
@@ -115,7 +121,7 @@
             <label for="ssn">
                 <i class="fa fa-credit-score"></i> Credit Score:
             </label>
-            <input type="number" id="ssn" name="credit_score" class="form-control" placeholder="Enter Credit Score">
+            <input type="number" id="credit_score" name="credit_score" class="form-control" min="0" max="900" placeholder="Enter Credit Score" required>
         </div>
         @endif
 

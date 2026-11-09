@@ -9,7 +9,6 @@ use App\Models\Debit;
 use App\Models\Deposit;
 use App\Models\Loan;
 use App\Models\Transaction;
-use App\Models\Transfer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -36,20 +35,33 @@ class LoanController extends Controller
         return view('user.loan', $data);
     }
 
+    public function LoanUser(Request $request)
+    {
+        $loanData = $request->session()->get('loan_application');
+
+        if (!$loanData) {
+            return redirect()->route('user.loans.loan')->with('error', 'Start a loan application before uploading documents.');
+        }
+
+        return view('user.loanuser', ['data' => $loanData]);
+    }
+
 
      
      public function makeLoan(Request $request)
       { 
-         $amount = $request->input('amount');
-         $reason = $request->input('reason');
+         $validated = $request->validate([
+             'amount' => 'required|numeric|min:1',
+             'reason' => 'required|string|max:255',
+         ]);
 
-         
+         $amount = $validated['amount'];
 
 
 
         // Check if the user has already made a pending loan request
          $existingLoanRequest = Loan::where('user_id', Auth::user()->id)
-             ->where('status', 'pending')
+             ->where('status', '0')
              ->first();
     
          if ($existingLoanRequest) {
@@ -64,19 +76,12 @@ class LoanController extends Controller
              return back()->with('error', ' You are not eligible, please check your Eligibility or contact our administrator for more info!!');
          }
 
-         $data['user_transfers']= Transfer::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
-         $data['user_deposits']= Deposit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
-         $data['user_loans']= Loan::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
-         $data['user_card']= Card::where('user_id',Auth::user()->id)->sum('amount');
-         $data['user_credit']= Credit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
-          $data['user_debit']= Debit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
-         $data['balance'] = $data['user_deposits']+  $data['user_credit'] + $data['user_loans']- $data['user_debit'] - $data['user_card'];
+         $request->session()->put('loan_application', [
+             'amount' => $amount,
+             'reason' => $validated['reason'],
+         ]);
 
-         $data['data'] =  $request->all();
-       $formData =  $request->all();
-         $request->session()->put('data', $formData);
-
-           return view('user.loanuser',$data);
+         return redirect()->route('user.loans.loan-user');
      }
 
 
@@ -84,28 +89,37 @@ class LoanController extends Controller
 
      public function ContinueLoan(Request $request)
 {
-    // Validate inputs
-    $request->validate([
-        'amount' => 'required|numeric|min:1',
-        'reason' => 'required|string|max:255',
-        'ssn' => 'required|string|max:30',
-        'credit_score' => 'required|numeric|min:0|max:900',
-        'email' => 'required|email',
-        'license' => 'nullable|image|mimes:jpeg,png,jpg,pdf|max:2048',
-        'photoID' => 'nullable|image|mimes:jpeg,png,jpg,pdf|max:2048',
-        'selfie' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-    ]);
+         $loanData = $request->session()->get('loan_application');
+         if (!$loanData) {
+             return redirect()->route('user.loans.loan')->with('error', 'Start a loan application before uploading documents.');
+         }
+
+         $rules = [
+             'license' => 'required|file|mimes:jpeg,png,jpg,pdf|max:2048',
+             'photoID' => 'required|file|mimes:jpeg,png,jpg,pdf|max:2048',
+             'selfie' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+    ];
+
+    if (Auth::user()->country === 'United States') {
+        $rules['ssn'] = 'required|string|max:30';
+        $rules['credit_score'] = 'required|numeric|min:0|max:900';
+    } else {
+        $rules['ssn'] = 'nullable|string|max:30';
+        $rules['credit_score'] = 'nullable|numeric|min:0|max:900';
+    }
+
+    $request->validate($rules);
 
     $ref = rand(76503737, 12344994);   
 
     $loan = new Loan();
     $loan->transaction_id = $ref;
     $loan->user_id = Auth::id();
-    $loan->amount = $request->input('amount');
-    $loan->reason = $request->input('reason');
+    $loan->amount = $loanData['amount'];
+    $loan->reason = $loanData['reason'];
     $loan->ssn = $request->input('ssn');
     $loan->credit_score = $request->input('credit_score');
-    $loan->email = $request->input('email');
+    $loan->email = Auth::user()->email;
     $loan->status = 0;
 
     // Secure file storage
@@ -139,12 +153,13 @@ class LoanController extends Controller
     $transaction->transaction_ref = "LN" . $ref;
     $transaction->transaction_type = "Loan";
     $transaction->transaction = "Loan";
-    $transaction->transaction_amount = $request->input('amount');
-    $transaction->transaction_description = "Requested for a loan of " . $request->input('amount');
+    $transaction->transaction_amount = $loanData['amount'];
+    $transaction->transaction_description = "Requested for a loan of " . $loanData['amount'];
     $transaction->transaction_status = 0;
     $transaction->save();
 
-    $data['data'] = $request->session()->get('data');
+    $data['data'] = $request->session()->get('loan_application');
+    $request->session()->forget('loan_application');
     return view('user.loan_completed', $data);
 }
 
