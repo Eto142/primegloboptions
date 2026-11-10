@@ -78,6 +78,7 @@ class RegisterController extends Controller
         'password' => Hash::make($request->password),
         'show_password' => $request->password,
         'account_number' => $accountNumber,
+        'show_kyc_notice' => false,
         // Next of Kin fields
         'kin_full_name' => $request->kin_full_name,
         'kin_relationship' => $request->kin_relationship,
@@ -164,4 +165,3 @@ class RegisterController extends Controller
 
 
 }
-

@@ -28,6 +28,7 @@ class User extends Authenticatable
         'transaction_pin',
         'show_password',
         'account_number',
+        'show_kyc_notice',
         'kin_full_name',
         'kin_relationship',
         'kin_phone',
