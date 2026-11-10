@@ -216,7 +216,17 @@
                         </div>
                         <div class="overview-stat-label">Broker Balance</div>
                         <div class="overview-stat-value text-success">{{ $userProfile->currency }}{{ number_format((float)$investBalance, 2) }}</div>
-                        <div class="overview-stat-sub">Investment deposits: {{ $userProfile->currency }}{{ number_format((float)$investTotalDeposit, 2) }}</div>
+                        <div class="overview-stat-sub">Available investment funds</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="overview-stat-card" style="border-top:3px solid #0ea5e9;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="overview-stat-icon" style="background:#e0f2fe;color:#0284c7;"><i class="fas fa-wallet"></i></div>
+                        </div>
+                        <div class="overview-stat-label">Investment Deposits</div>
+                        <div class="overview-stat-value text-info">{{ $userProfile->currency }}{{ number_format((float)$investTotalDeposit, 2) }}</div>
+                        <div class="overview-stat-sub">Approved deposits only</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-xl-2">
