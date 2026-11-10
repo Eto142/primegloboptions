@@ -47,7 +47,7 @@ class InvestBrokerController extends Controller
 
         $earnings   = InvestEarning::where('user_id', $uid)->sum('amount');
         $referral   = InvestReferral::where('user_id', $uid)->sum('amount');
-        $deposit    = Deposit::where('user_id', $uid)->where('status', '1')->sum('amount');
+        $deposit    = Deposit::investmentSide()->where('user_id', $uid)->where('status', '1')->sum('amount');
         $withdrawal = Withdrawal::where('user_id', $uid)->sum('amount') ?? 0;
 
         $balance = $profit + $deposit + $earnings + $referral - $withdrawal;
@@ -341,7 +341,7 @@ class InvestBrokerController extends Controller
         $uid  = Auth::id();
         $data = $this->balanceData();
 
-        $data['deposits'] = Deposit::where('user_id', $uid)
+        $data['deposits'] = Deposit::investmentSide()->where('user_id', $uid)
                                    ->orderBy('created_at', 'desc')
                                    ->get();
 
@@ -413,7 +413,7 @@ class InvestBrokerController extends Controller
             Deposit::create([
                 'user_id'        => Auth::id(),
                 'transaction_id' => $transactionId,
-                'deposit_type'   => 'crypto',
+                'deposit_type'   => 'investment',
                 'amount'         => $request->input('amount'),
                 'status'         => 0,
             ]);
@@ -423,7 +423,7 @@ class InvestBrokerController extends Controller
                 'user_id'                 => Auth::id(),
                 'transaction_id'          => $transactionId,
                 'transaction_type'        => 'Credit',
-                'transaction'             => 'Deposit',
+                'transaction'             => 'Investment Deposit',
                 'transaction_amount'      => $request->input('amount'),
                 'wallet_type'             => $walletTypeMap[$request->input('item')] ?? $request->input('item'),
                 'transaction_description' => 'Crypto deposit — ' . $request->input('trading_name')
@@ -714,7 +714,7 @@ class InvestBrokerController extends Controller
         $uid  = Auth::id();
         $data = $this->balanceData();
 
-        $data['deposits']     = Deposit::where('user_id', $uid)
+        $data['deposits']     = Deposit::investmentSide()->where('user_id', $uid)
                                         ->orderBy('created_at', 'desc')
                                         ->get();
 

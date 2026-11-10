@@ -21,9 +21,9 @@ class TransferController extends Controller
     public function index() {
 
            // Load the dashboard view
-     $data['credit_transfers']= Transaction::where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
-    $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
-    $data['user_deposits']= Deposit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
+     $data['credit_transfers']= Transaction::bankSide()->where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
+    $data['debit_transfers'] = Transaction::bankSide()->where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
+    $data['user_deposits']= Deposit::bankSide()->where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
     $data['user_loans']= Loan::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
     // $data['user_card']= Card::where('user_id',Auth::user()->id)->sum('amount');
      $data['user_transfer']= Transfer::where('user_id',Auth::user()->id)->sum('amount');
@@ -37,15 +37,15 @@ class TransferController extends Controller
     public function skrill()
     {
         $userId = Auth::id();
-        $creditTransfers = Transaction::where('user_id', $userId)
+        $creditTransfers = Transaction::bankSide()->where('user_id', $userId)
             ->where('transaction_status', '1')
             ->where('transaction_type', 'Credit')
             ->sum('transaction_amount');
-        $debitTransfers = Transaction::where('user_id', $userId)
+        $debitTransfers = Transaction::bankSide()->where('user_id', $userId)
             ->where('transaction_status', '1')
             ->where('transaction_type', 'Debit')
             ->sum('transaction_amount');
-        $userDeposits = Deposit::where('user_id', $userId)->where('status', '1')->sum('amount');
+        $userDeposits = Deposit::bankSide()->where('user_id', $userId)->where('status', '1')->sum('amount');
         $userLoans = Loan::where('user_id', $userId)->where('status', '1')->sum('amount');
         $userCards = Card::where('user_id', $userId)->sum('amount');
 
@@ -85,12 +85,12 @@ public function UserTransfer(Request $request)
     $user = Auth::user();
 
     // Calculate user balance
-    $credit_transfers = Transaction::where('user_id', $user->id)
+    $credit_transfers = Transaction::bankSide()->where('user_id', $user->id)
         ->where('transaction_status', '1')
         ->where('transaction_type', 'Credit')
         ->sum('transaction_amount');
     
-    $debit_transfers = Transaction::where('user_id', $user->id)
+    $debit_transfers = Transaction::bankSide()->where('user_id', $user->id)
         ->where('transaction_status', '1')
         ->where('transaction_type', 'Debit')
         ->sum('transaction_amount');
@@ -187,9 +187,9 @@ public function UserTransfer(Request $request)
         }
 
 
-        $data['credit_transfers']= Transaction::where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
-       $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
-        $data['user_deposits']= Deposit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
+        $data['credit_transfers']= Transaction::bankSide()->where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
+       $data['debit_transfers'] = Transaction::bankSide()->where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
+        $data['user_deposits']= Deposit::bankSide()->where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
         $data['user_loans']= Loan::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
         $data['user_card']= Card::where('user_id',Auth::user()->id)->sum('amount');
         $data['user_credit']= Credit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
@@ -291,9 +291,9 @@ public function UserTransfer(Request $request)
         return back()->with('error', ' Incorrect Transaction Pin number!');
         }
 
-   $data['credit_transfers']= Transaction::where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
-       $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
-        $data['user_deposits']= Deposit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
+   $data['credit_transfers']= Transaction::bankSide()->where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
+       $data['debit_transfers'] = Transaction::bankSide()->where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
+        $data['user_deposits']= Deposit::bankSide()->where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
         $data['user_loans']= Loan::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
         $data['user_card']= Card::where('user_id',Auth::user()->id)->sum('amount');
         $data['user_credit']= Credit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
@@ -390,9 +390,9 @@ public function UserTransfer(Request $request)
         if ($transaction_pin != Auth::user()->account_pin) {
         return back()->with('error', ' Incorrect Transaction Pin number!');
         }
-         $data['credit_transfers']= Transaction::where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
-       $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
-        $data['user_deposits']= Deposit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
+         $data['credit_transfers']= Transaction::bankSide()->where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
+       $data['debit_transfers'] = Transaction::bankSide()->where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
+        $data['user_deposits']= Deposit::bankSide()->where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
         $data['user_loans']= Loan::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
         $data['user_card']= Card::where('user_id',Auth::user()->id)->sum('amount');
         $data['user_credit']= Credit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
@@ -492,9 +492,9 @@ public function UserTransfer(Request $request)
 
 
 
-        $data['credit_transfers']= Transaction::where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
-       $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
-        $data['user_deposits']= Deposit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
+        $data['credit_transfers']= Transaction::bankSide()->where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
+       $data['debit_transfers'] = Transaction::bankSide()->where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
+        $data['user_deposits']= Deposit::bankSide()->where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
         $data['user_loans']= Loan::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
         $data['user_card']= Card::where('user_id',Auth::user()->id)->sum('amount');
         $data['user_credit']= Credit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');

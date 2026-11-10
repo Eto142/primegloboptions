@@ -41,11 +41,11 @@ class InvestmentController extends Controller
     public function index(): View
     {
         $userId = request()->user()->id;
-        $creditTransfers = Transaction::where('user_id', $userId)
+        $creditTransfers = Transaction::bankSide()->where('user_id', $userId)
             ->where('transaction_status', '1')
             ->where('transaction_type', 'Credit')
             ->sum('transaction_amount');
-        $debitTransfers = Transaction::where('user_id', $userId)
+        $debitTransfers = Transaction::bankSide()->where('user_id', $userId)
             ->where('transaction_status', '1')
             ->where('transaction_type', 'Debit')
             ->sum('transaction_amount');

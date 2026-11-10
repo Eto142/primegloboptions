@@ -24,9 +24,9 @@ class LoanController extends Controller
         $data['outstanding_loan']= Loan::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
        $data['pending_loan']= Loan::where('user_id', Auth::user()->id)->where('status','0')->sum('amount');
        $data['transaction']= Transaction::where('user_id', Auth::user()->id)->where('transaction','Loan')->get();
-        $data['credit_transfers']= Transaction::where('user_id',Auth::user()->id)->where('transaction_status','1')->sum('transaction_amount');
-        $data['debit_transfers']= Transaction::where('user_id',Auth::user()->id)->where('transaction_status','1')->sum('transaction_amount');
-        $data['user_deposits']= Deposit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
+        $data['credit_transfers']= Transaction::bankSide()->where('user_id',Auth::user()->id)->where('transaction_status','1')->sum('transaction_amount');
+        $data['debit_transfers']= Transaction::bankSide()->where('user_id',Auth::user()->id)->where('transaction_status','1')->sum('transaction_amount');
+        $data['user_deposits']= Deposit::bankSide()->where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
         $data['user_loans']= Loan::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
         $data['user_card']= Card::where('user_id',Auth::user()->id)->sum('amount');
         $data['user_credit']= Credit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');

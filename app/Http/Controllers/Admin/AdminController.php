@@ -25,10 +25,10 @@ class AdminController extends Controller
         $activeUsersCount  = User::where('updated_at', '>=', $now->copy()->subDays(30))->count();
 
         // ── Deposits ─────────────────────────────────────────────────────
-        $totalDepositCount    = Deposit::count();
-        $pendingDepositCount  = Deposit::where('status', 0)->count();
-        $approvedDepositCount = Deposit::where('status', 1)->count();
-        $totalDepositAmount   = Deposit::where('status', 1)->sum('amount');
+        $totalDepositCount    = Deposit::bankSide()->count();
+        $pendingDepositCount  = Deposit::bankSide()->where('status', 0)->count();
+        $approvedDepositCount = Deposit::bankSide()->where('status', 1)->count();
+        $totalDepositAmount   = Deposit::bankSide()->where('status', 1)->sum('amount');
 
         // ── Transfers ────────────────────────────────────────────────────
         $totalTransferCount    = Transfer::count();
@@ -59,7 +59,7 @@ class AdminController extends Controller
 
         // ── Recent Activity ───────────────────────────────────────────────
         $recentUsers    = User::latest()->take(6)->get();
-        $recentDeposits = Deposit::with('user')->latest()->take(5)->get();
+        $recentDeposits = Deposit::bankSide()->with('user')->latest()->take(5)->get();
 
         return view('admin.dashboard', compact(
             // Users

@@ -25,14 +25,14 @@ class DashboardController extends Controller
     $user = auth()->user();
 
     // Fetch only the latest 5 transactions for this user
-    $RecentTransactions = Transaction::where('user_id', $user->id)->latest()->take(5)->get();
+    $RecentTransactions = Transaction::bankSide()->where('user_id', $user->id)->latest()->take(5)->get();
 
-    $RecentActivity = Transaction::where('user_id', $user->id)->latest()->take(4)->get();
+    $RecentActivity = Transaction::bankSide()->where('user_id', $user->id)->latest()->take(4)->get();
 
     // Load the dashboard view
-     $data['credit_transfers']= Transaction::where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
-    $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
-    $data['user_deposits']= Deposit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
+     $data['credit_transfers']= Transaction::bankSide()->where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
+    $data['debit_transfers'] = Transaction::bankSide()->where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
+    $data['user_deposits']= Deposit::bankSide()->where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
     $data['user_loans']= Loan::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
     // $data['user_card']= Card::where('user_id',Auth::user()->id)->sum('amount');
      $data['user_transfer']= Transfer::where('user_id',Auth::user()->id)->sum('amount');
@@ -47,7 +47,7 @@ class DashboardController extends Controller
     //yoyo
 
    
-         $data['transaction'] = Transaction::where('user_id', Auth::user()->id)
+         $data['transaction'] = Transaction::bankSide()->where('user_id', Auth::user()->id)
                                         ->orderBy('created_at', 'desc')
                                         ->get();
                                         
@@ -62,15 +62,15 @@ class DashboardController extends Controller
 
      public function Alltransactions()
     {
-        $data['credit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_status', '1')->where('transaction_type', 'Credit')->sum('transaction_amount');
-        $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_status', '1')->where('transaction_type', 'Debit')->sum('transaction_amount');
-        $data['user_deposits'] = Deposit::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
+        $data['credit_transfers'] = Transaction::bankSide()->where('user_id', Auth::user()->id)->where('transaction_status', '1')->where('transaction_type', 'Credit')->sum('transaction_amount');
+        $data['debit_transfers'] = Transaction::bankSide()->where('user_id', Auth::user()->id)->where('transaction_status', '1')->where('transaction_type', 'Debit')->sum('transaction_amount');
+        $data['user_deposits'] = Deposit::bankSide()->where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
         $data['user_loans'] = Loan::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
         $data['user_transfer'] = Transfer::where('user_id', Auth::user()->id)->sum('amount');
         $data['user_credit'] = Credit::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
         $data['user_debit'] = Debit::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
         $data['balance'] = $data['credit_transfers'] - $data['debit_transfers'];
-        $data['transaction'] = Transaction::where('user_id', Auth::user()->id)
+        $data['transaction'] = Transaction::bankSide()->where('user_id', Auth::user()->id)
                                        ->orderBy('created_at', 'desc')
                                        ->get();
         $data['allTransactions'] = $data['transaction'];
@@ -137,16 +137,16 @@ class DashboardController extends Controller
   public function profile()
     {
 
-         $data['credit_transfers']= Transaction::where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
-    $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
-    $data['user_deposits']= Deposit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
+         $data['credit_transfers']= Transaction::bankSide()->where('user_id',Auth::user()->id)->where('transaction_status','1')->where('transaction_type', 'Credit') ->sum('transaction_amount');
+    $data['debit_transfers'] = Transaction::bankSide()->where('user_id', Auth::user()->id)->where('transaction_status', '1') ->where('transaction_type', 'Debit')  ->sum('transaction_amount');// Include only debit transactions->sum('transaction_amount');
+    $data['user_deposits']= Deposit::bankSide()->where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
     $data['user_loans']= Loan::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
     // $data['user_card']= Card::where('user_id',Auth::user()->id)->sum('amount');
      $data['user_transfer']= Transfer::where('user_id',Auth::user()->id)->sum('amount');
     $data['user_credit']= Credit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
     $data['user_debit']= Debit::where('user_id',Auth::user()->id)->where('status','1')->sum('amount');
     $data['balance'] = $data['credit_transfers'] - $data['debit_transfers'];
-         $data['transaction'] = Transaction::where('user_id', Auth::user()->id)
+         $data['transaction'] = Transaction::bankSide()->where('user_id', Auth::user()->id)
                                         ->orderBy('created_at', 'desc')
                                         ->get();
         return view('user.profile', $data); // Load the dashboard view

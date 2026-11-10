@@ -43,17 +43,17 @@ class ManageUserController extends Controller
 
         $data = [
             'userProfile'       => $user,
-            'credit_transfers'  => Transaction::where('user_id', $id)
+            'credit_transfers'  => Transaction::bankSide()->where('user_id', $id)
                                         ->where('transaction_status', '1')
                                         ->where('transaction_type', 'Credit')
                                         ->sum('transaction_amount'),
 
-            'debit_transfers'   => Transaction::where('user_id', $id)
+            'debit_transfers'   => Transaction::bankSide()->where('user_id', $id)
                                         ->where('transaction_status', '1')
                                         ->where('transaction_type', 'Debit')
                                         ->sum('transaction_amount'),
 
-            'user_deposits'     => Deposit::where('user_id', $id)
+            'user_deposits'     => Deposit::bankSide()->where('user_id', $id)
                                         ->where('status', '1')
                                         ->sum('amount'),
                                         
@@ -74,7 +74,7 @@ class ManageUserController extends Controller
                                         ->orderBy('id', 'desc')
                                         ->get(),
 
-            'user_deposits_list'=> Deposit::where('user_id', $id)
+            'user_deposits_list'=> Deposit::bankSide()->where('user_id', $id)
                                         ->orderBy('id', 'desc')
                                         ->get(),
 
@@ -91,7 +91,7 @@ class ManageUserController extends Controller
                                         ->orderBy('id', 'desc')
                                         ->get(),
 
-            'user_transactions' => Transaction::where('user_id', $id)
+            'user_transactions' => Transaction::bankSide()->where('user_id', $id)
                                         ->orderBy('id', 'desc')
                                         ->get(),
 
@@ -125,7 +125,7 @@ class ManageUserController extends Controller
 
         $investAddProfit        = \App\Models\InvestProfit::where('user_id', $uid)->sum('amount');
         $investTotalDebitProfit = \App\Models\InvestDebitProfit::where('user_id', $uid)->sum('amount');
-        $investTotalDeposit    = \App\Models\Deposit::where('user_id', $uid)->where('status', '1')->sum('amount');
+        $investTotalDeposit    = \App\Models\Deposit::investmentSide()->where('user_id', $uid)->where('status', '1')->sum('amount');
         $investTotalProfit      = $investAddProfit - $investTotalDebitProfit;
         $investTotalEarning     = \App\Models\InvestEarning::where('user_id', $uid)->sum('amount');
         $investTotalBonus       = \App\Models\InvestReferral::where('user_id', $uid)->sum('amount');

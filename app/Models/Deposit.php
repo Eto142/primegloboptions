@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
@@ -27,6 +28,19 @@ class Deposit extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeBankSide(Builder $query): Builder
+    {
+        return $query->where(function (Builder $query) {
+            $query->whereNull('deposit_type')
+                ->orWhere('deposit_type', '!=', 'investment');
+        });
+    }
+
+    public function scopeInvestmentSide(Builder $query): Builder
+    {
+        return $query->where('deposit_type', 'investment');
     }
 
     /**

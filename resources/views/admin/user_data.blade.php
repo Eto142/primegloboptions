@@ -158,7 +158,7 @@
                         </div>
                         <div class="overview-stat-label">Total Credits</div>
                         <div class="overview-stat-value">{{ $userProfile->currency }}{{ number_format((float)$credit_transfers, 2) }}</div>
-                        <div class="overview-stat-sub">All inbound credits</div>
+                        <div class="overview-stat-sub">Bank-side credits</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-xl-2">
@@ -168,7 +168,7 @@
                         </div>
                         <div class="overview-stat-label">Total Debits</div>
                         <div class="overview-stat-value text-danger">{{ $userProfile->currency }}{{ number_format((float)$debit_transfers, 2) }}</div>
-                        <div class="overview-stat-sub">All outbound debits</div>
+                        <div class="overview-stat-sub">Bank-side debits</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-xl-2">
@@ -178,7 +178,7 @@
                         </div>
                         <div class="overview-stat-label">Total Deposits</div>
                         <div class="overview-stat-value text-info">{{ $userProfile->currency }}{{ number_format((float)$user_deposits, 2) }}</div>
-                        <div class="overview-stat-sub">All deposits made</div>
+                        <div class="overview-stat-sub">Bank deposits only</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-xl-2">
@@ -216,7 +216,7 @@
                         </div>
                         <div class="overview-stat-label">Broker Balance</div>
                         <div class="overview-stat-value text-success">{{ $userProfile->currency }}{{ number_format((float)$investBalance, 2) }}</div>
-                        <div class="overview-stat-sub">Current broker funds</div>
+                        <div class="overview-stat-sub">Investment deposits: {{ $userProfile->currency }}{{ number_format((float)$investTotalDeposit, 2) }}</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-xl-2">

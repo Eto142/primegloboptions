@@ -26,12 +26,12 @@ class PaymentController extends Controller
     $wallets = Wallet::where('status', 'active')->get();
 
     // Transactions summary
-    $creditTransfers = Transaction::where('user_id', $userId)
+    $creditTransfers = Transaction::bankSide()->where('user_id', $userId)
         ->where('transaction_status', '1')
         ->where('transaction_type', 'Credit')
         ->sum('transaction_amount');
 
-    $debitTransfers = Transaction::where('user_id', $userId)
+    $debitTransfers = Transaction::bankSide()->where('user_id', $userId)
         ->where('transaction_status', '1')
         ->where('transaction_type', 'Debit')
         ->sum('transaction_amount');
@@ -40,7 +40,7 @@ class PaymentController extends Controller
     $data = [
         'credit_transfers' => $creditTransfers,
         'debit_transfers'  => $debitTransfers,
-        'user_deposits'    => Deposit::where('user_id', $userId)->where('status', '1')->sum('amount'),
+        'user_deposits'    => Deposit::bankSide()->where('user_id', $userId)->where('status', '1')->sum('amount'),
         'user_loans'       => Loan::where('user_id', $userId)->where('status', '1')->sum('amount'),
         'user_transfer'    => Transfer::where('user_id', $userId)->sum('amount'),
         'user_credit'      => Credit::where('user_id', $userId)->where('status', '1')->sum('amount'),

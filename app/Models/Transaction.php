@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -36,5 +37,13 @@ class Transaction extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeBankSide(Builder $query): Builder
+    {
+        return $query->where(function (Builder $query) {
+            $query->whereNull('transaction')
+                ->orWhere('transaction', '!=', 'Investment Deposit');
+        });
     }
 }

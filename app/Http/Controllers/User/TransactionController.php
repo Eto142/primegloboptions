@@ -19,7 +19,7 @@ class TransactionController extends Controller
     $user = auth()->user();
 
     // Fetch all transactions for this user, ordered by latest
-    $allTransactions = Transaction::where('user_id', $user->id)
+    $allTransactions = Transaction::bankSide()->where('user_id', $user->id)
                                   ->latest()
                                   ->get();
 
@@ -42,5 +42,4 @@ class TransactionController extends Controller
         return Excel::download(new TransactionsExport(auth()->id()), 'transactions.xlsx');
     }
 }
-
 
