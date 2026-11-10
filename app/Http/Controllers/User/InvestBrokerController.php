@@ -66,6 +66,14 @@ class InvestBrokerController extends Controller
             ->orderBy('matures_at')
             ->first();
 
+        $headerNotifications = InvestNotification::where('user_id', $uid)
+            ->latest()
+            ->limit(5)
+            ->get();
+        $unreadNotificationCount = InvestNotification::where('user_id', $uid)
+            ->where('is_read', false)
+            ->count();
+
         return [
             'profit'         => $profit,
             'add_profit'      => $addProfit,
@@ -80,6 +88,8 @@ class InvestBrokerController extends Controller
             'active_plans'   => $activePlans,
             'next_plan'      => $nextPlan,
             'est_returns'    => round($profit + $earnings, 2),
+            'header_notifications' => $headerNotifications,
+            'unread_notification_count' => $unreadNotificationCount,
         ];
     }
 

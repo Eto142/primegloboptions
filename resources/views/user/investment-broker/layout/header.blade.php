@@ -125,6 +125,58 @@
             font-weight: 600; display: flex; align-items: center; gap: 6px; transition: var(--transition);
         }
         .ib-back-btn:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+        .ib-notification-toggle {
+            position: relative; width: 42px; height: 42px; display: flex; align-items: center;
+            justify-content: center; background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+            color: #94a3b8; font-size: 1rem; transition: var(--transition);
+        }
+        .ib-notification-toggle:hover, .ib-notification-toggle[aria-expanded="true"] {
+            background: rgba(201,162,39,0.1); border-color: var(--border); color: var(--gold);
+        }
+        .ib-notification-count {
+            position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px;
+            display: flex; align-items: center; justify-content: center; padding: 0 4px;
+            background: var(--danger); border: 2px solid var(--dark); border-radius: 10px;
+            color: #fff; font-size: 0.62rem; font-weight: 800; line-height: 1;
+        }
+        .ib-notification-menu {
+            width: min(360px, calc(100vw - 32px)); padding: 0; overflow: hidden;
+            background: var(--dark2); border: 1px solid var(--border); border-radius: 14px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+        }
+        .ib-notification-menu-head, .ib-notification-menu-foot { padding: 14px 16px; }
+        .ib-notification-menu-head { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+        .ib-notification-menu-title { color: #fff; font-size: 0.88rem; font-weight: 800; }
+        .ib-notification-menu-count { color: var(--gold); font-size: 0.72rem; font-weight: 700; }
+        .ib-notification-list { max-height: 340px; overflow-y: auto; }
+        .ib-notification-item {
+            display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05); color: #e2e8f0;
+        }
+        .ib-notification-item:last-child { border-bottom: 0; }
+        .ib-notification-item:hover { background: rgba(201,162,39,0.06); color: #fff; }
+        .ib-notification-item.unread { background: rgba(201,162,39,0.04); }
+        .ib-notification-icon {
+            width: 34px; height: 34px; display: flex; flex: 0 0 34px; align-items: center;
+            justify-content: center; border-radius: 10px; background: rgba(201,162,39,0.1);
+            color: var(--gold); font-size: 0.82rem;
+        }
+        .ib-notification-message { color: #e2e8f0; font-size: 0.78rem; line-height: 1.5; overflow-wrap: anywhere; }
+        .ib-notification-time { margin-top: 4px; color: var(--text-muted); font-size: 0.68rem; }
+        .ib-notification-empty { padding: 30px 16px; color: var(--text-muted); text-align: center; font-size: 0.8rem; }
+        .ib-notification-menu-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--border); }
+        .ib-notification-menu-foot a, .ib-notification-menu-foot button {
+            padding: 0; border: 0; background: transparent; color: var(--gold);
+            font-size: 0.74rem; font-weight: 700; white-space: nowrap;
+        }
+        .ib-notification-menu-foot a:hover, .ib-notification-menu-foot button:hover { color: var(--gold-light); }
+        @media (max-width: 575px) {
+            .ib-topnav { padding: 0 12px; gap: 8px; }
+            .ib-topnav-right { gap: 7px; }
+            .ib-balance-pill { padding: 6px 9px; font-size: 0.72rem; }
+            .ib-back-btn { padding: 7px 10px; }
+        }
 
         /* ── TICKER ──────────────────────────────── */
         .ticker-bar {
@@ -414,6 +466,50 @@
             {{ Auth::user()->currency ?? '$' }}{{ number_format($user_balance ?? $balance ?? 0, 2) }}
         </div>
         <div class="ib-topnav-right">
+            <div class="dropdown">
+                <button class="ib-notification-toggle" type="button" id="ibNotificationsDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false"
+                        aria-label="Notifications, {{ $unread_notification_count }} unread">
+                    <i class="fas fa-bell" aria-hidden="true"></i>
+                    @if ($unread_notification_count > 0)
+                        <span class="ib-notification-count">{{ $unread_notification_count > 99 ? '99+' : $unread_notification_count }}</span>
+                    @endif
+                </button>
+                <div class="dropdown-menu dropdown-menu-end ib-notification-menu" aria-labelledby="ibNotificationsDropdown">
+                    <div class="ib-notification-menu-head">
+                        <span class="ib-notification-menu-title"><i class="fas fa-bell me-2" style="color:var(--gold);"></i>Notifications</span>
+                        <span class="ib-notification-menu-count">{{ $unread_notification_count }} unread</span>
+                    </div>
+                    <div class="ib-notification-list">
+                        @forelse ($header_notifications as $notification)
+                            <a class="ib-notification-item {{ $notification->is_read ? '' : 'unread' }}"
+                               href="{{ route('user.investments.notifications') }}">
+                                <span class="ib-notification-icon"><i class="fas fa-bell" aria-hidden="true"></i></span>
+                                <span>
+                                    <span class="ib-notification-message">{{ $notification->message }}</span>
+                                    <span class="ib-notification-time d-block">{{ $notification->created_at->diffForHumans() }}</span>
+                                </span>
+                            </a>
+                        @empty
+                            <div class="ib-notification-empty">
+                                <i class="fas fa-bell-slash d-block mb-2" style="font-size:1.2rem;"></i>
+                                You're all caught up.
+                            </div>
+                        @endforelse
+                    </div>
+                    <div class="ib-notification-menu-foot">
+                        @if ($unread_notification_count > 0)
+                            <form action="{{ route('user.investments.mark-all-read') }}" method="POST" class="m-0">
+                                @csrf
+                                <button type="submit"><i class="fas fa-check-double me-1"></i>Mark all read</button>
+                            </form>
+                        @else
+                            <span class="ib-notification-menu-count">You're up to date</span>
+                        @endif
+                        <a href="{{ route('user.investments.all-notifications') }}">View all <i class="fas fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
             <a href="{{ route('user.home') }}" class="ib-back-btn">
                 <i class="fas fa-arrow-left"></i>
                 <span class="d-none d-sm-inline">Bank Dashboard</span>
