@@ -396,7 +396,12 @@
             <div class="row g-3">
                 <div class="col-md-6 col-lg-3">
                     <button type="button" class="btn btn-success w-100 d-flex flex-column align-items-center justify-content-center p-3" data-bs-toggle="modal" data-bs-target="#addDepositModal">
-                        <i class="fas fa-wallet fs-2 mb-2"></i><span>Add Deposit</span>
+                        <i class="fas fa-wallet fs-2 mb-2"></i><span>Add Bank Deposit</span>
+                    </button>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <button type="button" class="btn btn-outline-success w-100 d-flex flex-column align-items-center justify-content-center p-3" data-bs-toggle="modal" data-bs-target="#addInvestmentDepositModal">
+                        <i class="fas fa-chart-pie fs-2 mb-2"></i><span>Add Investment Deposit</span>
                     </button>
                 </div>
                 <div class="col-md-6 col-lg-3">
@@ -1586,6 +1591,22 @@
             </form>
         </div>
     </div>
+</div>
+
+<!-- Add Investment Deposit Modal -->
+<div class="modal fade" id="addInvestmentDepositModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Add Investment Deposit</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <form action="{{ route('admin.investment.add-deposit', $userProfile->id) }}" method="POST">
+            @csrf
+            <div class="modal-body">
+                <p class="text-muted small">This amount will be added to the user's investment broker balance, not their bank balance.</p>
+                <div class="mb-3"><label class="form-label">Amount</label><input type="number" step="0.01" min="0.01" name="amount" class="form-control" required></div>
+                <div class="mb-3"><label class="form-label">Description</label><input type="text" name="description" class="form-control" maxlength="255" placeholder="Optional note"></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-success">Add Investment Deposit</button></div>
+        </form>
+    </div></div>
 </div>
 
 <!-- Add Deposit Modal -->

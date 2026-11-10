@@ -16,6 +16,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ManageUserController extends Controller
 {
@@ -309,6 +310,43 @@ class ManageUserController extends Controller
             'plan_type' => 'manual',
         ]);
         return back()->with('success', 'Investment profit added successfully.');
+    }
+
+    public function addInvestDeposit(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01|decimal:0,2|max:9999999999999.99',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $user = User::findOrFail($id);
+        $transactionId = (string) Str::uuid();
+        $description = trim('Admin investment deposit' . (
+            filled($validated['description'] ?? null) ? ': ' . $validated['description'] : ''
+        ));
+
+        DB::transaction(function () use ($user, $validated, $transactionId, $description): void {
+            Deposit::create([
+                'user_id' => $user->id,
+                'transaction_id' => $transactionId,
+                'deposit_type' => 'investment',
+                'amount' => $validated['amount'],
+                'email' => $user->email,
+                'status' => 1,
+            ]);
+
+            Transaction::create([
+                'user_id' => $user->id,
+                'transaction_id' => $transactionId,
+                'transaction_type' => 'Credit',
+                'transaction' => 'Investment Deposit',
+                'transaction_amount' => $validated['amount'],
+                'transaction_description' => $description,
+                'transaction_status' => '1',
+            ]);
+        });
+
+        return back()->with('success', 'Investment deposit added successfully.');
     }
 
     // Debit a user's investment profit

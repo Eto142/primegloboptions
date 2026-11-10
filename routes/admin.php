@@ -114,6 +114,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::post('investment/cancel/{id}', [ManageInvestmentController::class, 'cancel'])->name('investment.cancel');
 
         // ── Investment user management (per-user) ──────────────────────
+        Route::post('investment/deposit/{id}', [ManageUserController::class, 'addInvestDeposit'])->name('investment.add-deposit');
         Route::post('investment/add-profit', [ManageUserController::class, 'addInvestProfit'])->name('investment.add-profit');
         Route::post('investment/debit-profit', [ManageUserController::class, 'debitInvestProfit'])->name('investment.debit-profit');
         Route::post('investment/add-earning', [ManageUserController::class, 'addInvestEarning'])->name('investment.add-earning');
