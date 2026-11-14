@@ -20,6 +20,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 /**
  * InvestBrokerController
@@ -48,7 +50,9 @@ class InvestBrokerController extends Controller
         $earnings   = InvestEarning::where('user_id', $uid)->sum('amount');
         $referral   = InvestReferral::where('user_id', $uid)->sum('amount');
         $deposit    = Deposit::investmentSide()->where('user_id', $uid)->where('status', '1')->sum('amount');
-        $withdrawal = Withdrawal::where('user_id', $uid)->sum('amount') ?? 0;
+        $withdrawal = Withdrawal::where('user_id', $uid)
+            ->where('status', '!=', 2)
+            ->sum('amount');
 
         $balance = $profit + $deposit + $earnings + $referral - $withdrawal;
 
@@ -484,7 +488,7 @@ class InvestBrokerController extends Controller
     /**
      * 22. Withdrawals page — form + history for this user.
      */
-    public function withdrawals()
+    public function withdrawals(Request $request)
     {
         $uid  = Auth::id();
         $data = $this->balanceData();
@@ -492,6 +496,10 @@ class InvestBrokerController extends Controller
         $data['withdrawals'] = Withdrawal::where('user_id', $uid)
                                           ->orderBy('created_at', 'desc')
                                           ->get();
+        $requestedMode = $request->query('mode');
+        $data['selectedMode'] = in_array($requestedMode, ['Bank Transfer', 'Crypto Currency', 'PayPal'], true)
+            ? $requestedMode
+            : 'Bank Transfer';
 
         return view('user.investment-broker.withdrawals', $data);
     }
@@ -501,43 +509,139 @@ class InvestBrokerController extends Controller
      */
     public function makeWithdrawal(Request $request)
     {
-        $request->validate([
-            'amount' => 'required|numeric|min:1',
-            'mode'   => 'required|string',
+        $validated = $request->validate([
+            'amount'              => ['required', 'numeric', 'min:1', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'mode'                => 'required|in:Bank Transfer,Crypto Currency,PayPal',
+            'account_number'      => 'required_if:mode,Bank Transfer|nullable|string|max:100',
+            'account_name'        => 'required_if:mode,Bank Transfer|nullable|string|max:100',
+            'bank_name'           => 'required_if:mode,Bank Transfer|nullable|string|max:100',
+            'swift'               => 'nullable|string|max:100',
+            'bank_routing_number' => 'nullable|string|max:100',
+            'bank_country'        => 'nullable|string|max:100',
+            'crypto_type'         => 'required_if:mode,Crypto Currency|nullable|in:BTC,ETH,USDT,LTC',
+            'wallet_address'      => 'required_if:mode,Crypto Currency|nullable|string|max:250',
+            'email'               => 'required_if:mode,PayPal|nullable|email|max:250',
         ]);
 
-        $transactionId = (string) rand(10000000, 99999999);
+        $uid = Auth::id();
+        $withdrawal = DB::transaction(function () use ($validated, $uid) {
+            User::whereKey($uid)->lockForUpdate()->firstOrFail();
+            $availableBalance = $this->balanceData()['balance'];
 
-        Withdrawal::create([
-            'user_id'            => Auth::id(),
-            'transaction_id'     => $transactionId,
-            'amount'             => $request->input('amount'),
-            'mode'               => $request->input('mode'),
-            'account_name'       => $request->input('account_name'),
-            'account_number'     => $request->input('account_number'),
-            'bank_name'          => $request->input('bank_name'),
-            'swift'              => $request->input('swift'),
-            'bank_routing_number'=> $request->input('bank_routing_number'),
-            'bank_country'       => $request->input('bank_country'),
-            'crypto_type'        => $request->input('crypto_type'),
-            'wallet_address'     => $request->input('wallet_address'),
-            'status'             => 0,
-        ]);
+            if ((float) $validated['amount'] > (float) $availableBalance) {
+                throw ValidationException::withMessages([
+                    'amount' => 'The withdrawal amount exceeds your available balance.',
+                ]);
+            }
 
-        Transaction::create([
-            'user_id'                 => Auth::id(),
-            'transaction_id'          => $transactionId,
-            'transaction_type'        => 'Debit',
-            'transaction'             => 'Withdrawal',
-            'transaction_amount'      => $request->input('amount'),
-            'wallet_type'             => $request->input('crypto_type'),
-            'wallet_address'          => $request->input('wallet_address'),
-            'transaction_description' => 'Withdrawal via ' . $request->input('mode'),
-            'transaction_status'      => 'pending',
+            $transactionId = (string) Str::uuid();
+            $withdrawal = Withdrawal::create([
+                'user_id'             => $uid,
+                'transaction_id'      => $transactionId,
+                'amount'              => $validated['amount'],
+                'mode'                => $validated['mode'],
+                'email'               => $validated['mode'] === 'PayPal' ? $validated['email'] : null,
+                'account_name'        => $validated['mode'] === 'Bank Transfer' ? $validated['account_name'] : null,
+                'account_number'      => $validated['mode'] === 'Bank Transfer' ? $validated['account_number'] : null,
+                'bank_name'           => $validated['mode'] === 'Bank Transfer' ? $validated['bank_name'] : null,
+                'swift'               => $validated['mode'] === 'Bank Transfer' ? ($validated['swift'] ?? null) : null,
+                'bank_routing_number' => $validated['mode'] === 'Bank Transfer' ? ($validated['bank_routing_number'] ?? null) : null,
+                'bank_country'        => $validated['mode'] === 'Bank Transfer' ? ($validated['bank_country'] ?? null) : null,
+                'crypto_type'         => $validated['mode'] === 'Crypto Currency' ? $validated['crypto_type'] : null,
+                'wallet_address'      => $validated['mode'] === 'Crypto Currency' ? $validated['wallet_address'] : null,
+                'status'              => 0,
+            ]);
+
+            Transaction::create([
+                'user_id'                 => $uid,
+                'transaction_id'          => $transactionId,
+                'transaction_type'        => 'Debit',
+                'transaction'             => 'Withdrawal',
+                'transaction_amount'      => $validated['amount'],
+                'wallet_type'             => $validated['crypto_type'] ?? null,
+                'wallet_address'          => $validated['wallet_address'] ?? null,
+                'transaction_description' => 'Withdrawal via ' . $validated['mode'],
+                'transaction_status'      => 'pending',
+            ]);
+
+            return $withdrawal;
+        });
+
+        return redirect()->route('user.investments.withdrawal-code', $withdrawal->id)
+            ->with('status', 'Withdrawal request submitted. Enter your withdrawal code to continue.');
+    }
+
+    public function withdrawalCode($id)
+    {
+        $withdrawal = Withdrawal::where('user_id', Auth::id())->findOrFail($id);
+        abort_if((int) $withdrawal->status !== 0, 404);
+
+        $data = $this->balanceData();
+        $data['withdrawal'] = $withdrawal;
+
+        return view('user.investment-broker.withdrawal-code', $data);
+    }
+
+    public function verifyWithdrawalCode(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'withdrawal_code' => 'required|string|max:255',
         ]);
+        $withdrawal = Withdrawal::where('user_id', Auth::id())->findOrFail($id);
+        abort_if((int) $withdrawal->status !== 0, 404);
+
+        if (!Auth::user()->withdrawal_code
+            || !hash_equals((string) Auth::user()->withdrawal_code, $validated['withdrawal_code'])) {
+            return back()->withErrors([
+                'withdrawal_code' => 'The withdrawal code is invalid or has not been configured. Contact support.',
+            ])->withInput();
+        }
+
+        $request->session()->put('investment_withdrawal_code_verified', $withdrawal->id);
+
+        return redirect()->route('user.investments.withdrawal-tax-code', $withdrawal->id);
+    }
+
+    public function withdrawalTaxCode(Request $request, $id)
+    {
+        $withdrawal = Withdrawal::where('user_id', Auth::id())->findOrFail($id);
+        abort_if((int) $withdrawal->status !== 0, 404);
+
+        if ((int) $request->session()->get('investment_withdrawal_code_verified') !== (int) $withdrawal->id) {
+            return redirect()->route('user.investments.withdrawal-code', $withdrawal->id)
+                ->with('status', 'Verify your withdrawal code to continue.');
+        }
+
+        $data = $this->balanceData();
+        $data['withdrawal'] = $withdrawal;
+
+        return view('user.investment-broker.withdrawal-tax-code', $data);
+    }
+
+    public function verifyWithdrawalTaxCode(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'withdrawal_tax_code' => 'required|string|max:255',
+        ]);
+        $withdrawal = Withdrawal::where('user_id', Auth::id())->findOrFail($id);
+        abort_if((int) $withdrawal->status !== 0, 404);
+
+        if ((int) $request->session()->get('investment_withdrawal_code_verified') !== (int) $withdrawal->id) {
+            return redirect()->route('user.investments.withdrawal-code', $withdrawal->id)
+                ->with('status', 'Verify your withdrawal code to continue.');
+        }
+
+        if (!Auth::user()->withdrawal_tax_code
+            || !hash_equals((string) Auth::user()->withdrawal_tax_code, $validated['withdrawal_tax_code'])) {
+            return back()->withErrors([
+                'withdrawal_tax_code' => 'The withdrawal tax code is invalid or has not been configured. Contact support.',
+            ])->withInput();
+        }
+
+        $request->session()->forget('investment_withdrawal_code_verified');
 
         return redirect()->route('user.investments.withdrawals')
-                         ->with('success', 'Withdrawal request submitted successfully. Awaiting admin approval.');
+            ->with('success', 'Withdrawal codes verified. Your request is awaiting admin review.');
     }
 
     /**

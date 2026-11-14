@@ -296,6 +296,10 @@ Route::post('requestcard-delivery', [DashboardController::class, 'requestCardDel
     Route::get('/investments/deposit/address', [InvestBrokerController::class, 'depositAddress'])->name('investments.deposit.address');
     Route::get('/investments/withdrawals', [InvestBrokerController::class, 'withdrawals'])->name('investments.withdrawals');
     Route::post('/investments/withdrawals', [InvestBrokerController::class, 'makeWithdrawal'])->name('investments.withdrawals.store');
+    Route::get('/investments/withdrawals/{id}/code', [InvestBrokerController::class, 'withdrawalCode'])->name('investments.withdrawal-code');
+    Route::post('/investments/withdrawals/{id}/code', [InvestBrokerController::class, 'verifyWithdrawalCode'])->name('investments.withdrawal-code.verify');
+    Route::get('/investments/withdrawals/{id}/tax-code', [InvestBrokerController::class, 'withdrawalTaxCode'])->name('investments.withdrawal-tax-code');
+    Route::post('/investments/withdrawals/{id}/tax-code', [InvestBrokerController::class, 'verifyWithdrawalTaxCode'])->name('investments.withdrawal-tax-code.verify');
     Route::get('/investments/account-history', [InvestBrokerController::class, 'accountHistory'])->name('investments.account-history');
     Route::get('/investments/withdrawal-select', [InvestBrokerController::class, 'withdrawalSelect'])->name('investments.withdrawal-select');
     Route::post('/investments/buy-plans', [InvestBrokerController::class, 'buyPlans'])->name('investments.buy-plans');

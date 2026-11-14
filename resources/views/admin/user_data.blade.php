@@ -1404,7 +1404,7 @@
                 @if($investWithdrawals->isNotEmpty())
                     <div class="table-responsive">
                         <table class="table table-hover table-sm align-middle">
-                            <thead class="table-light"><tr><th>Date</th><th>Txn ID</th><th>Method</th><th>Amount</th><th>Status</th></tr></thead>
+                            <thead class="table-light"><tr><th>Date</th><th>Txn ID</th><th>Method</th><th>Destination</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
                             <tbody>
                                 @foreach($investWithdrawals as $withdrawal)
                                     @php
@@ -1416,8 +1416,38 @@
                                         <td>{{ $withdrawal->created_at?->format('M d, Y') ?? '-' }}</td>
                                         <td><code>{{ $withdrawal->transaction_id ?? '-' }}</code></td>
                                         <td>{{ $withdrawal->mode ?? $withdrawal->crypto_type ?? '-' }}</td>
+                                        <td>
+                                            @if($withdrawal->mode === 'Crypto Currency')
+                                                {{ $withdrawal->crypto_type }}: {{ $withdrawal->wallet_address }}
+                                            @elseif($withdrawal->mode === 'PayPal')
+                                                {{ $withdrawal->email }}
+                                            @else
+                                                {{ $withdrawal->account_name }}<br>
+                                                {{ $withdrawal->bank_name }} — {{ $withdrawal->account_number }}
+                                                @if($withdrawal->swift)<br>SWIFT: {{ $withdrawal->swift }}@endif
+                                                @if($withdrawal->bank_routing_number)<br>Routing: {{ $withdrawal->bank_routing_number }}@endif
+                                            @endif
+                                        </td>
                                         <td class="fw-bold">{{ $userProfile->currency }}{{ number_format((float)$withdrawal->amount,2) }}</td>
                                         <td><span class="badge bg-{{ $wc }}">{{ $wl }}</span></td>
+                                        <td>
+                                            @if((int) $withdrawal->status === 0)
+                                                <div class="d-flex gap-1">
+                                                    <form action="{{ route('admin.withdrawal.status', $withdrawal->id) }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="status" value="1">
+                                                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                                    </form>
+                                                    <form action="{{ route('admin.withdrawal.status', $withdrawal->id) }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="status" value="2">
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm">Decline</button>
+                                                    </form>
+                                                </div>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

@@ -16,22 +16,32 @@
             <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
         </div>
     @endif
+    @if(session('status'))
+        <div class="alert border-0 rounded-3 mb-3" style="background:rgba(59,130,246,0.1);color:#60a5fa;">
+            {{ session('status') }}
+        </div>
+    @endif
+    @if($errors->any())
+        <div class="alert alert-danger">{{ $errors->first() }}</div>
+    @endif
 
     <form action="{{ route('user.investments.withdrawals.store') }}" method="POST">
         @csrf
 
         <div class="mb-3">
             <label class="form-label fw-semibold small" style="color:var(--text-muted);">Amount (USD)</label>
-            <input type="number" name="amount" class="form-ib" placeholder="0.00" min="1" step="0.01" required value="{{ old('amount') }}">
+            <input type="number" name="amount" class="form-ib" placeholder="0.00" min="1" step="0.01" max="{{ max(0, $balance) }}" required value="{{ old('amount') }}">
             @error('amount') <div class="small mt-1" style="color:var(--danger);">{{ $message }}</div> @enderror
         </div>
 
         <div class="mb-3">
             <label class="form-label fw-semibold small" style="color:var(--text-muted);">Payment Mode</label>
             <select name="mode" id="modeSelect" class="form-ib" onchange="toggleMode()" required>
-                <option value="Bank Transfer"   {{ old('mode') == 'Bank Transfer'   ? 'selected' : '' }}>Bank Transfer</option>
-                <option value="Crypto Currency" {{ old('mode') == 'Crypto Currency' ? 'selected' : '' }}>Crypto Currency</option>
+                <option value="Bank Transfer" {{ old('mode', $selectedMode) == 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                <option value="Crypto Currency" {{ old('mode', $selectedMode) == 'Crypto Currency' ? 'selected' : '' }}>Crypto Currency</option>
+                <option value="PayPal" {{ old('mode', $selectedMode) == 'PayPal' ? 'selected' : '' }}>PayPal</option>
             </select>
+            @error('mode') <div class="small mt-1" style="color:var(--danger);">{{ $message }}</div> @enderror
         </div>
 
         {{-- Bank fields --}}
@@ -67,15 +77,25 @@
             <div class="mb-3">
                 <label class="form-label small" style="color:var(--text-muted);">Crypto Type</label>
                 <select name="crypto_type" class="form-ib">
-                    <option value="BTC">Bitcoin (BTC)</option>
-                    <option value="ETH">Ethereum (ETH)</option>
-                    <option value="USDT">Tether (USDT)</option>
-                    <option value="LTC">Litecoin (LTC)</option>
+                    <option value="BTC" {{ old('crypto_type') == 'BTC' ? 'selected' : '' }}>Bitcoin (BTC)</option>
+                    <option value="ETH" {{ old('crypto_type') == 'ETH' ? 'selected' : '' }}>Ethereum (ETH)</option>
+                    <option value="USDT" {{ old('crypto_type') == 'USDT' ? 'selected' : '' }}>Tether (USDT)</option>
+                    <option value="LTC" {{ old('crypto_type') == 'LTC' ? 'selected' : '' }}>Litecoin (LTC)</option>
                 </select>
+                @error('crypto_type') <div class="small mt-1" style="color:var(--danger);">{{ $message }}</div> @enderror
             </div>
             <div class="mb-3">
                 <label class="form-label small" style="color:var(--text-muted);">Wallet Address</label>
                 <input type="text" name="wallet_address" class="form-ib" value="{{ old('wallet_address') }}">
+                @error('wallet_address') <div class="small mt-1" style="color:var(--danger);">{{ $message }}</div> @enderror
+            </div>
+        </div>
+
+        <div id="paypalBlock" style="display:none;">
+            <div class="mb-3">
+                <label class="form-label small" style="color:var(--text-muted);">PayPal Email</label>
+                <input type="email" name="email" class="form-ib" value="{{ old('email') }}">
+                @error('email') <div class="small mt-1" style="color:var(--danger);">{{ $message }}</div> @enderror
             </div>
         </div>
 
@@ -102,6 +122,7 @@
                         <th>Details</th>
                         <th>Status</th>
                         <th>Date</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -121,6 +142,8 @@
                             <td style="font-size:0.78rem;color:var(--text-muted);">
                                 @if($w->mode === 'Crypto Currency')
                                     {{ $w->crypto_type }} — {{ Str::limit($w->wallet_address, 20) }}
+                                @elseif($w->mode === 'PayPal')
+                                    {{ $w->email }}
                                 @else
                                     {{ $w->bank_name }} — {{ $w->account_number }}
                                 @endif
@@ -136,6 +159,11 @@
                             </td>
                             <td style="font-size:0.78rem;color:var(--text-muted);">
                                 {{ $w->created_at->format('M j, Y g:i A') }}
+                            </td>
+                            <td>
+                                @if((int) $w->status === 0)
+                                    <a class="btn-outline-gold" style="padding:6px 10px;font-size:0.75rem;" href="{{ route('user.investments.withdrawal-code', $w->id) }}">Continue verification</a>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -158,6 +186,7 @@ function toggleMode() {
     const mode = document.getElementById('modeSelect').value;
     document.getElementById('bankBlock').style.display   = mode === 'Bank Transfer'   ? 'block' : 'none';
     document.getElementById('cryptoBlock').style.display = mode === 'Crypto Currency' ? 'block' : 'none';
+    document.getElementById('paypalBlock').style.display = mode === 'PayPal' ? 'block' : 'none';
 }
 // Apply on page load in case of old() repopulation
 toggleMode();

@@ -13,6 +13,7 @@ use App\Models\Trade;
 use App\Models\Transaction;
 use App\Models\Transfer;
 use App\Models\User;
+use App\Models\Withdrawal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -130,7 +131,7 @@ class ManageUserController extends Controller
         $investTotalProfit      = $investAddProfit - $investTotalDebitProfit;
         $investTotalEarning     = \App\Models\InvestEarning::where('user_id', $uid)->sum('amount');
         $investTotalBonus       = \App\Models\InvestReferral::where('user_id', $uid)->sum('amount');
-        $investTotalWithdrawal  = \App\Models\Withdrawal::where('user_id', $uid)->sum('amount') ?? 0;
+        $investTotalWithdrawal  = Withdrawal::where('user_id', $uid)->where('status', '!=', 2)->sum('amount');
         $investTotalInvested    = \App\Models\InvestPlan::where('user_id', $uid)->whereIn('status', ['active', 'completed'])->sum('amount');
         $investBalance          = $investTotalDeposit + $investTotalEarning + $investTotalProfit + $investTotalBonus - $investTotalWithdrawal;
 
@@ -259,6 +260,39 @@ class ManageUserController extends Controller
         $user->save();
 
         return back()->with('status', 'Loan eligibility updated successfully for ' . $user->first_name);
+    }
+
+    public function WithdrawalStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:1,2',
+        ]);
+
+        $updated = DB::transaction(function () use ($validated, $id) {
+            $withdrawal = Withdrawal::lockForUpdate()->findOrFail($id);
+
+            if ((int) $withdrawal->status !== 0) {
+                return false;
+            }
+
+            $withdrawal->status = (int) $validated['status'];
+            $withdrawal->save();
+
+            Transaction::where('user_id', $withdrawal->user_id)
+                ->where('transaction_id', $withdrawal->transaction_id)
+                ->where('transaction', 'Withdrawal')
+                ->update(['transaction_status' => $validated['status']]);
+
+            return true;
+        });
+
+        if (!$updated) {
+            return back()->with('error', 'Only pending withdrawals can be updated.');
+        }
+
+        return back()->with('success', $validated['status'] === '1'
+            ? 'Withdrawal approved successfully.'
+            : 'Withdrawal declined successfully.');
     }
 
     // ── Investment broker management (per-user) ─────────────────────────
