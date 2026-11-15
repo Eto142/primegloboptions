@@ -9,9 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_suspended')->default(false);
-            $table->boolean('is_on_hold')->default(false);
-            $table->boolean('is_frozen')->default(false);
+            if (! Schema::hasColumn('users', 'is_suspended')) {
+                $table->boolean('is_suspended')->default(false);
+            }
+            if (! Schema::hasColumn('users', 'is_on_hold')) {
+                $table->boolean('is_on_hold')->default(false);
+            }
+            if (! Schema::hasColumn('users', 'is_frozen')) {
+                $table->boolean('is_frozen')->default(false);
+            }
         });
     }
 

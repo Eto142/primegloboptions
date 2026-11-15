@@ -124,6 +124,7 @@ class ManageUserController extends Controller
         $investKycs             = \App\Models\InvestKyc::where('user_id', $uid)->orderBy('created_at', 'desc')->get();
         $investNotifications    = \App\Models\InvestNotification::where('user_id', $uid)->orderBy('created_at', 'desc')->get();
         $investWithdrawals     = \App\Models\Withdrawal::where('user_id', $uid)->orderBy('created_at', 'desc')->get();
+        $investDeposits        = \App\Models\Deposit::investmentSide()->where('user_id', $uid)->orderBy('created_at', 'desc')->get();
 
         $investAddProfit        = \App\Models\InvestProfit::where('user_id', $uid)->sum('amount');
         $investTotalDebitProfit = \App\Models\InvestDebitProfit::where('user_id', $uid)->sum('amount');
@@ -148,6 +149,7 @@ class ManageUserController extends Controller
         $data['investKycs']             = $investKycs;
         $data['investNotifications']    = $investNotifications;
         $data['investWithdrawals']      = $investWithdrawals;
+        $data['investDeposits']         = $investDeposits;
         $data['investAddProfit']        = $investAddProfit;
         $data['investTotalDebitProfit'] = $investTotalDebitProfit;
         $data['investTotalDeposit']     = $investTotalDeposit;

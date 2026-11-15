@@ -615,6 +615,7 @@
             <button type="button" class="htab-btn" onclick="showPane('pane-earnings', this)"><i class="fas fa-coins"></i> Earnings</button>
             <button type="button" class="htab-btn" onclick="showPane('pane-referrals', this)"><i class="fas fa-users"></i> Referrals</button>
             <button type="button" class="htab-btn" onclick="showPane('pane-withdrawals', this)"><i class="fas fa-wallet"></i> Withdrawals</button>
+            <button type="button" class="htab-btn" onclick="showPane('pane-invest-deposits', this)"><i class="fas fa-piggy-bank"></i> Deposits</button>
             <button type="button" class="htab-btn" onclick="showPane('pane-kyc', this)"><i class="fas fa-id-card"></i> KYC</button>
         </div>
 
@@ -1458,6 +1459,59 @@
                 @endif
             </div>
 
+            <!-- Broker Deposits Tab -->
+            <div id="pane-invest-deposits" style="display:none;">
+                <h6 class="mb-2"><i class="fas fa-piggy-bank text-success me-1"></i> Broker Deposits</h6>
+                @if($investDeposits->isNotEmpty())
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Txn ID</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($investDeposits as $dep)
+                                    @php
+                                        $ds = (string)($dep->status ?? '0');
+                                        $dc = $ds==='1' ? 'success' : ($ds==='2' ? 'danger' : 'warning');
+                                        $dl = $ds==='1' ? 'Approved' : ($ds==='2' ? 'Declined' : 'Pending');
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $dep->created_at?->format('M d, Y') ?? '-' }}</td>
+                                        <td><code>{{ $dep->transaction_id ?? '-' }}</code></td>
+                                        <td class="fw-bold">{{ $userProfile->currency }}{{ number_format((float)$dep->amount, 2) }}</td>
+                                        <td><span class="badge bg-{{ $dc }}">{{ $dl }}</span></td>
+                                        <td>
+                                            @if($ds === '0')
+                                                <div class="d-flex gap-1">
+                                                    <form action="{{ route('admin.approve-deposit', $dep->id) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                                    </form>
+                                                    <form action="{{ route('admin.decline-deposit', $dep->id) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm">Decline</button>
+                                                    </form>
+                                                </div>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="alert alert-info mb-0"><i class="fas fa-info-circle me-2"></i> No broker deposits found.</div>
+                @endif
+            </div>
+
             <!-- KYC Tab -->
             <div id="pane-kyc" style="display:none;">
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -2179,7 +2233,7 @@
 <script>
 function showPane(paneId, btn) {
     // Hide all panes
-    var panes = ['pane-transactions','pane-transfers','pane-cards','pane-deposits','pane-loans','pane-savings','pane-orders','pane-plans','pane-profits','pane-debit-profits','pane-earnings','pane-referrals','pane-withdrawals','pane-kyc'];
+    var panes = ['pane-transactions','pane-transfers','pane-cards','pane-deposits','pane-loans','pane-savings','pane-orders','pane-plans','pane-profits','pane-debit-profits','pane-earnings','pane-referrals','pane-withdrawals','pane-invest-deposits','pane-kyc'];
     panes.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.style.display = 'none';
